@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Formato
+        run: npm run formato:revisar
+      - name: Ejemplos ejecutables
+        run: npm run verificar
+      - name: Ejercicios vs. soluciones
+        run: npm run test:soluciones
+      - name: Build del sitio
+        run: npm run build

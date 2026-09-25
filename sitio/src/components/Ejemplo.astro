@@ -1,0 +1,30 @@
+---
+// Muestra un archivo de ejemplos/ con resaltado de sintaxis.
+// El código se lee del archivo real, así lo que ve el alumno es lo que se ejecuta.
+//
+//   <Ejemplo archivo="basico/04-asincronia/01-callbacks.js" />
+import { Code } from '@astrojs/starlight/components';
+
+interface Props {
+  /** Ruta relativa a ejemplos/ */
+  archivo: string;
+  /** Título de la tarjeta de código; por defecto, la ruta del archivo. */
+  titulo?: string;
+  /** Lenguaje para el resaltado; por defecto, la extensión del archivo. */
+  lang?: string;
+}
+
+const archivos = import.meta.glob<string>('../../../ejemplos/**/*.{js,mjs,ts,json,sql,csv,txt,env}', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+
+const { archivo, titulo, lang } = Astro.props;
+const codigo = archivos[`../../../ejemplos/${archivo}`];
+if (codigo === undefined) {
+  throw new Error(`<Ejemplo>: no existe ejemplos/${archivo}`);
+}
+---
+
+<Code code={codigo} lang={lang ?? archivo.split('.').pop()} title={titulo ?? `ejemplos/${archivo}`} />

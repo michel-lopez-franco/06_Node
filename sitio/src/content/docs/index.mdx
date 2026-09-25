@@ -1,0 +1,29 @@
+---
+title: Node.js desde cero
+description: Curso de Node.js para Ingeniería en Computación (CUCEI), de cero a nivel profesional.
+template: splash
+hero:
+  tagline: De tu primer script a una API lista para producción, un paso a la vez.
+  actions:
+    - text: Ver el temario
+      link: temario/
+      icon: right-arrow
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<CardGrid stagger>
+  <Card title="Nivel básico" icon="seti:javascript">
+    Node sin frameworks: módulos, asincronía, archivos y pruebas con `node:test`.
+  </Card>
+  <Card title="Nivel intermedio" icon="rocket">
+    De script a API: streams, HTTP, Fastify, diseño REST y PostgreSQL.
+  </Card>
+  <Card title="Nivel pro" icon="star">
+    Autenticación, arquitectura, TypeScript, seguridad y despliegue.
+  </Card>
+  <Card title="Un proyecto que crece contigo" icon="puzzle">
+    Construyes una API de tareas que evoluciona módulo a módulo, desde una CLI hasta un servicio
+    desplegado.
+  </Card>
+</CardGrid>

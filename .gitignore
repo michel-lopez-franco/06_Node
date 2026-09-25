@@ -1,0 +1,19 @@
+# dependencias
+node_modules/
+
+# salida del sitio
+dist/
+.astro/
+
+# entorno
+.env
+.env.*
+!.env.ejemplo
+
+# datos generados por ejemplos y el proyecto
+*.log
+coverage/
+tareas.json
+
+# sistema
+.DS_Store
