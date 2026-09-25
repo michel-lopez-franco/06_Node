@@ -1,0 +1,143 @@
+---
+title: Variables de entorno
+description: Configura tus programas con process.env, con valores por defecto y validación, en cualquier sistema operativo.
+sidebar:
+  order: 4
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Leer variables de entorno con `process.env`.
+- Definir variables de entorno al ejecutar un programa en macOS, Linux y Windows.
+- Aplicar valores por defecto y convertir los valores al tipo correcto.
+- Validar la configuración al arrancar y fallar con un mensaje claro.
+
+## Explicación
+
+### ¿Qué es una variable de entorno?
+
+Cada programa que se ejecuta recibe del sistema operativo un conjunto de **variables de
+entorno**: pares nombre–valor como `PATH` (dónde buscar programas) o `HOME` (tu carpeta
+personal). Además puedes definir las tuyas al ejecutar un programa.
+
+Se usan para **configurar** un programa sin cambiar su código: el puerto de un servidor, la
+dirección de la base de datos o si se muestran mensajes de depuración. El mismo código corre
+en tu computadora y en un servidor, cada uno con su configuración.
+
+### `process.env`
+
+En Node, las variables de entorno están en **`process.env`**, un objeto donde cada propiedad
+es una variable:
+
+```js
+process.env.PUERTO; // '8080' si la definiste; undefined si no
+```
+
+Tres reglas importantes:
+
+1. **Todos los valores son texto.** `PUERTO=8080` llega como `'8080'` y `DEPURAR=false` llega
+   como `'false'`, un texto no vacío que en un `if` cuenta como verdadero.
+2. **Si la variable no existe, el valor es `undefined`**. Usa un valor por defecto:
+   `process.env.PUERTO ?? '3000'`.
+3. **Una variable puede existir y estar vacía** (`''`). `??` solo reemplaza `undefined` y
+   `null`; si también quieres reemplazar el texto vacío, usa `||`.
+
+Por convención, los nombres van en MAYÚSCULAS y con guiones bajos: `PUERTO`, `MODO_DEPURACION`.
+
+### Definir variables al ejecutar
+
+<Tabs syncKey="so">
+  <TabItem label="macOS">
+    Escríbelas antes del comando. Solo existen para esa ejecución:
+
+    ```sh
+    NOMBRE=Ana PUERTO=8080 node app.js
+    ```
+  </TabItem>
+  <TabItem label="Linux">
+    Escríbelas antes del comando. Solo existen para esa ejecución:
+
+    ```sh
+    NOMBRE=Ana PUERTO=8080 node app.js
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    En PowerShell se asignan con `$env:` y **duran hasta que cierres la terminal**:
+
+    ```powershell
+    $env:NOMBRE="Ana"; $env:PUERTO="8080"; node app.js
+    ```
+
+    Para quitarlas: `Remove-Item Env:NOMBRE, Env:PUERTO`.
+  </TabItem>
+</Tabs>
+
+<Aside>
+  En proyectos reales la configuración suele guardarse en un archivo `.env` que Node puede
+  leer con `node --env-file=.env app.js`. Lo verás en el módulo 12.
+</Aside>
+
+## Ejemplos
+
+<Ejemplo archivo="basico/01-que-es-node/05-variables-de-entorno.js" />
+
+Desde `ejemplos/basico/01-que-es-node`, primero sin variables:
+
+```sh
+node 05-variables-de-entorno.js
+```
+
+```txt
+Hola, desconocido
+Puerto: 3000 (process.env.PUERTO es de tipo undefined)
+Tu carpeta personal: /Users/ana
+```
+
+Y ahora con variables (usa la forma de tu sistema de arriba):
+
+```sh
+NOMBRE=Ana PUERTO=8080 node 05-variables-de-entorno.js
+```
+
+```txt
+Hola, Ana
+Puerto: 8080 (process.env.PUERTO es de tipo string)
+Tu carpeta personal: /Users/ana
+```
+
+## Errores comunes
+
+**`NOMBRE=Ana : The term 'NOMBRE=Ana' is not recognized...`** (Windows). Esa sintaxis es de
+macOS y Linux. En PowerShell usa `$env:NOMBRE="Ana"; node app.js`.
+
+**La variable sigue ahí en la siguiente ejecución** (Windows). En PowerShell, `$env:` dura toda
+la sesión. Quítala con `Remove-Item Env:NOMBRE` o abre otra terminal.
+
+**`DEPURAR=false` activa la depuración.** `'false'` es un texto no vacío, y en un `if` cuenta
+como verdadero. Compara contra el texto: `process.env.DEPURAR === 'true'`.
+
+**El puerto sale `0`.** La variable estaba definida pero vacía (`PUERTO=`) y usaste `??`:
+`Number('')` es `0`. Usa `||` para tratar el vacío como "sin valor", o valida el resultado.
+
+**`TypeError: Cannot read properties of undefined (reading 'toLowerCase')`**. Llamaste un
+método sobre una variable que no existe. Aplica el valor por defecto antes:
+`(process.env.MODO ?? '').toLowerCase()`.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/01-que-es-node/04-configuracion-desde-env">
+  La función recibe el objeto `env` como parámetro para poder probarla. En un programa real se
+  llamaría así: `leerConfiguracion(process.env)`.
+</Ejercicio>
+
+## Para saber más
+
+- [`process.env`](https://nodejs.org/docs/latest-v24.x/api/process.html#processenv)
+  (documentación oficial)
+- [Leer variables de entorno](https://nodejs.org/en/learn/command-line/how-to-read-environment-variables-from-nodejs)
+- [The Twelve-Factor App: configuración](https://12factor.net/es/config), por qué la
+  configuración va en el entorno

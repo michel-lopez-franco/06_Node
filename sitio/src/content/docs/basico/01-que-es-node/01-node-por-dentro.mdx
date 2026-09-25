@@ -1,0 +1,118 @@
+---
+title: Node por dentro
+description: Qué son V8 y libuv, y en qué se parece y en qué se diferencia Node del navegador.
+sidebar:
+  order: 1
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+
+## Objetivos
+
+- Explicar qué es un _runtime_ de JavaScript.
+- Describir qué hacen V8 y libuv dentro de Node.
+- Identificar qué objetos existen en el navegador, cuáles en Node y cuáles en ambos.
+- Reconocer el error que aparece al usar `window` o `document` en Node.
+
+## Explicación
+
+### JavaScript necesita dónde ejecutarse
+
+JavaScript es un lenguaje; por sí solo no sabe mostrar una página ni leer un archivo. Necesita
+un **_runtime_** (entorno de ejecución): un programa que ejecuta el código y le da
+herramientas para interactuar con el mundo.
+
+- El **navegador** es un _runtime_ pensado para páginas web: le da a tu código `document`,
+  `window`, eventos de clic, etc.
+- **Node** es un _runtime_ pensado para programas que corren en una computadora o un
+  servidor: le da a tu código acceso a archivos, a la red, a la terminal y al sistema
+  operativo.
+
+### Las piezas de Node
+
+```txt
+        Tu programa (JavaScript)
+                   │
+  APIs de Node: process, node:fs, node:http...
+                   │
+        ┌──────────┴──────────┐
+       V8                   libuv
+ (ejecuta el JS)   (archivos, red, temporizadores)
+        └──────────┬──────────┘
+                   │
+           Sistema operativo
+```
+
+- **V8** es el motor de JavaScript de Google Chrome. Lee tu código, lo convierte a código
+  máquina y lo ejecuta. Node usa el mismo motor, por eso el lenguaje se comporta igual que en
+  Chrome.
+- **libuv** es una librería escrita en C que se encarga de las operaciones que tardan: leer
+  archivos, esperar respuestas de la red, temporizadores. Las pide al sistema operativo y
+  avisa cuando terminan, sin que tu programa se quede detenido esperando. Esa es la base del
+  _event loop_ (el ciclo que atiende esos avisos), que estudiaremos en el módulo 4.
+- Las **APIs de Node** son los objetos y módulos que usas desde tu código, como `process` o
+  `node:fs`. Por dentro se apoyan en V8 y libuv.
+
+### Node frente al navegador
+
+| Disponible en…     | Ejemplos                                                        |
+| ------------------ | --------------------------------------------------------------- |
+| Solo el navegador  | `window`, `document`, `alert`, eventos del DOM                  |
+| Solo Node          | `process`, módulos como `node:fs` (archivos) y `node:http` (servidores) |
+| Ambos              | El lenguaje completo, `console`, `setTimeout`, `fetch`, `URL`, `JSON`, `Math` |
+
+Para referirte al objeto global sin importar el entorno, usa **`globalThis`**. En el navegador
+es lo mismo que `window` y en Node es el objeto que contiene a `process`, `console`, etc.
+
+## Ejemplos
+
+<Ejemplo archivo="basico/01-que-es-node/01-globales.js" />
+
+Desde `ejemplos/basico/01-que-es-node`:
+
+```sh
+node 01-globales.js
+```
+
+Salida esperada (las versiones pueden variar):
+
+```txt
+¿Existe window? false
+¿Existe document? false
+¿Existe process? true
+¿Existen console, setTimeout, fetch y URL? [ 'object', 'function', 'function', 'function' ]
+¿globalThis.process es process? true
+Node: 24.7.0
+V8 (el motor de JavaScript): 13.6.233.10-node.26
+libuv (archivos, red y temporizadores): 1.51.0
+```
+
+`typeof` permite preguntar si algo existe sin provocar un error: si la variable no está
+definida, devuelve `'undefined'`.
+
+## Errores comunes
+
+**`ReferenceError: document is not defined`** (o `window is not defined`, `alert is not
+defined`). Estás usando algo que solo existe en el navegador. En Node no hay página: para
+mostrar información usa `console.log` y para leer datos del usuario, argumentos de la terminal
+(lo ves en [Argumentos de la terminal](../03-argumentos/)).
+
+**Pensar que Node es un lenguaje o un framework.** Node es el _runtime_; el lenguaje sigue
+siendo JavaScript. Los _frameworks_ (como Fastify, que usarás en el módulo 9) son librerías
+que corren encima de Node.
+
+## Ejercicios
+
+Esta lección no tiene tests. Practica con el ejemplo:
+
+1. Antes de ejecutarlo, agrega una línea que muestre si existe `alert`. Predice el resultado
+   y compruébalo.
+2. Agrega otra que muestre `process.platform`. ¿Qué valor sale en tu sistema?
+
+## Para saber más
+
+- [Introducción a Node.js](https://nodejs.org/es/learn/getting-started/introduction-to-nodejs)
+  (documentación oficial)
+- [Diferencias entre Node.js y el navegador](https://nodejs.org/es/learn/getting-started/differences-between-nodejs-and-the-browser)
+- [El motor V8 de JavaScript](https://nodejs.org/es/learn/getting-started/the-v8-javascript-engine)
+- [libuv](https://libuv.org/)

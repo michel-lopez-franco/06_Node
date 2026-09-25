@@ -1,0 +1,135 @@
+---
+title: El REPL y los scripts
+description: Prueba código en el REPL de Node y ejecuta scripts con node, node -e, node -p y --watch.
+sidebar:
+  order: 2
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Ejemplo from '../../../../components/Ejemplo.astro';
+
+## Objetivos
+
+- Abrir el REPL, evaluar expresiones y salir de él.
+- Ejecutar un archivo con `node archivo.js`.
+- Evaluar código corto sin crear un archivo con `node -e` y `node -p`.
+- Usar `node --watch` para que el script se vuelva a ejecutar al guardar.
+
+## Explicación
+
+### El REPL
+
+Si escribes `node` sin nada más, entras al **REPL** (_Read-Eval-Print Loop_): Node **lee** lo
+que escribes, lo **evalúa**, **imprime** el resultado y vuelve a empezar. Es la forma más rápida
+de probar una expresión o recordar cómo funciona un método.
+
+```txt
+$ node
+Welcome to Node.js v24.7.0.
+Type ".help" for more information.
+> 5 * 3
+15
+> _ + 1
+16
+> 'hola'.toUpperCase()
+'HOLA'
+> .exit
+```
+
+- No necesitas `console.log`: el REPL muestra el valor de cada expresión.
+- `_` guarda el resultado anterior.
+- <kbd>Tab</kbd> autocompleta. Escribe `'hola'.` y presiona <kbd>Tab</kbd> dos veces para ver
+  los métodos de los textos.
+- Para salir: `.exit`, <kbd>Ctrl</kbd> + <kbd>D</kbd> o <kbd>Ctrl</kbd> + <kbd>C</kbd> dos veces.
+- `.help` lista los comandos que empiezan con punto. `.editor` abre un modo para escribir
+  varias líneas; termina con <kbd>Ctrl</kbd> + <kbd>D</kbd>.
+
+### Scripts
+
+Para programas de más de una línea, escribe un archivo `.js` y ejecútalo con
+`node archivo.js`. Node lee el archivo de arriba abajo, lo ejecuta y **termina** cuando no le
+queda nada pendiente. La ruta del archivo es relativa a la carpeta actual de la terminal.
+
+### Código de una línea: `-e` y `-p`
+
+- `node -e "código"` (_evaluate_) ejecuta el código, como si estuviera en un archivo.
+- `node -p "expresión"` (_print_) además imprime el resultado.
+
+```sh
+node -p "2 + 3"                  # 5
+node -p "process.platform"       # darwin, linux o win32
+node -e "console.log('hola')"    # hola
+```
+
+Usa comillas dobles por fuera y sencillas por dentro: así funciona igual en zsh, bash y
+PowerShell.
+
+### Modo `--watch`
+
+Con `node --watch archivo.js`, Node ejecuta el archivo y se queda vigilándolo: cada vez que
+guardas un cambio, lo vuelve a ejecutar. Para salir, <kbd>Ctrl</kbd> + <kbd>C</kbd>. Es muy
+útil mientras escribes un programa; lo usarás mucho con los servidores del nivel intermedio.
+
+## Ejemplos
+
+<Ejemplo archivo="basico/01-que-es-node/02-tabla-de-multiplicar.js" />
+
+Desde `ejemplos/basico/01-que-es-node`:
+
+```sh
+node 02-tabla-de-multiplicar.js
+```
+
+Salida esperada:
+
+```txt
+Tabla del 7
+7 x 1 = 7
+7 x 2 = 14
+...
+7 x 10 = 70
+```
+
+Ahora ejecútalo en modo `--watch`, cambia `7` por otro número en el editor y guarda:
+
+```sh
+node --watch 02-tabla-de-multiplicar.js
+```
+
+<Aside>
+  Recuerda que los archivos de `ejemplos/` son del curso: si los modificas para experimentar y
+  después `git pull` se queja, deshaz tus cambios con `git restore ejemplos/`.
+</Aside>
+
+## Errores comunes
+
+**`Uncaught SyntaxError: Unexpected identifier 'archivo'`** al escribir `node archivo.js`.
+Estás dentro del REPL (el cursor es `>`), que solo entiende JavaScript. Sal con `.exit` y
+ejecuta el comando en la terminal.
+
+**`Error: Cannot find module '/Users/ana/cursos/tabla.js'`** (con `code: 'MODULE_NOT_FOUND'`).
+Node no encontró el archivo en la ruta que le diste. Revisa con `pwd` que estés en la carpeta
+correcta y con `ls` que el nombre esté bien escrito. La ruta que aparece en el mensaje te dice
+dónde lo buscó.
+
+**El REPL muestra `...` y no responde.** Dejaste un paréntesis, llave o comilla sin cerrar y
+el REPL espera el resto. Complétalo o presiona <kbd>Ctrl</kbd> + <kbd>C</kbd> para cancelar esa
+entrada.
+
+## Ejercicios
+
+Esta lección no tiene tests. Practica:
+
+1. En el REPL, averigua qué devuelve `[3, 1, 2].sort()` y `'a,b,c'.split(',')`. Usa `_` para
+   obtener el largo del último resultado.
+2. Con `node -p`, calcula cuántos segundos tiene un año.
+3. Deja `02-tabla-de-multiplicar.js` corriendo con `--watch` y cámbialo para que imprima
+   hasta el 12.
+
+## Para saber más
+
+- [REPL](https://nodejs.org/docs/latest-v24.x/api/repl.html) (documentación oficial)
+- [Cómo usar el REPL de Node](https://nodejs.org/en/learn/command-line/how-to-use-the-nodejs-repl)
+- [Opciones de la línea de comandos](https://nodejs.org/docs/latest-v24.x/api/cli.html):
+  `-e`, `-p` y `--watch`
+- [Ejecutar scripts de Node desde la línea de comandos](https://nodejs.org/en/learn/command-line/run-nodejs-scripts-from-the-command-line)

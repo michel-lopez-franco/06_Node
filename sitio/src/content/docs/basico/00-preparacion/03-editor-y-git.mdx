@@ -1,0 +1,178 @@
+---
+title: Editor y git
+description: Instala VS Code y git, clona el repositorio del curso y mantenlo actualizado.
+sidebar:
+  order: 3
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Objetivos
+
+- Instalar VS Code con las extensiones de ESLint y Prettier.
+- Instalar git y configurar tu nombre y correo.
+- Clonar el repositorio del curso y abrirlo en VS Code.
+- Guardar tu avance con `commit` y traer contenido nuevo con `pull`.
+
+## Explicación
+
+### VS Code
+
+Puedes usar el editor que prefieras, pero las instrucciones del curso asumen
+**[VS Code](https://code.visualstudio.com/)**. Instálalo desde su página o con el instalador de
+tu sistema:
+
+<Tabs syncKey="so">
+  <TabItem label="macOS">
+    ```sh
+    brew install --cask visual-studio-code
+    ```
+    Después, en VS Code, abre la paleta de comandos (<kbd>Cmd</kbd> + <kbd>Shift</kbd> +
+    <kbd>P</kbd>) y ejecuta **Shell Command: Install 'code' command in PATH**. Así podrás
+    abrir carpetas desde la terminal con `code .`.
+  </TabItem>
+  <TabItem label="Linux">
+    Descarga el paquete `.deb` o `.rpm` de [code.visualstudio.com](https://code.visualstudio.com/)
+    o usa la tienda de tu distribución. El comando `code` queda disponible en la terminal.
+  </TabItem>
+  <TabItem label="Windows">
+    ```powershell
+    winget install Microsoft.VisualStudioCode
+    ```
+    El comando `code` queda disponible en las terminales que abras después de instalarlo.
+  </TabItem>
+</Tabs>
+
+Instala dos extensiones desde el panel de extensiones (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd> +
+<kbd>Shift</kbd> + <kbd>X</kbd>):
+
+- **ESLint** (de Microsoft): marca errores en tu código mientras escribes.
+- **Prettier - Code formatter**: acomoda el formato de tu código (sangrías, comillas, punto y
+  coma) con las reglas del repositorio.
+
+Para que Prettier formatee al guardar, abre la configuración (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd> +
+<kbd>,</kbd>), busca **Format On Save** y actívalo.
+
+### git
+
+**git** es un sistema de control de versiones: guarda el historial de cambios de un proyecto.
+En este curso lo usas para dos cosas: descargar el repositorio y traer las actualizaciones
+que se vayan publicando.
+
+<Tabs syncKey="so">
+  <TabItem label="macOS">
+    ```sh
+    xcode-select --install
+    ```
+    Instala las herramientas de desarrollo de Apple, que incluyen git. Si usas Homebrew,
+    también sirve `brew install git`.
+  </TabItem>
+  <TabItem label="Linux">
+    ```sh
+    sudo apt install git
+    ```
+    En Fedora, `sudo dnf install git`.
+  </TabItem>
+  <TabItem label="Windows">
+    ```powershell
+    winget install Git.Git
+    ```
+    Cierra y abre la terminal después de instalarlo.
+  </TabItem>
+</Tabs>
+
+La primera vez, dile a git quién eres. Esos datos quedan registrados en cada _commit_ (un
+punto guardado en el historial):
+
+```sh
+git config --global user.name "Tu Nombre"
+git config --global user.email "tu.correo@ejemplo.com"
+```
+
+### Clonar el repositorio
+
+**Clonar** es descargar una copia completa del repositorio, con su historial, a tu
+computadora. Hazlo dentro de la carpeta `cursos` que creaste en
+[La terminal](../01-terminal/):
+
+```sh
+cd ~/cursos
+git clone https://github.com/michel-lopez-franco/06_Node.git curso-node
+cd curso-node
+code .
+```
+
+El último argumento de `git clone` (`curso-node`) es el nombre de la carpeta que se crea.
+`code .` abre la carpeta actual en VS Code.
+
+<Aside>
+  Para los ejercicios del nivel básico **no necesitas `npm install`**: los tests usan solo
+  Node. Ese comando instala las herramientas del sitio del curso y se usará más adelante.
+</Aside>
+
+### Guardar tu avance y traer lo nuevo
+
+El curso se va actualizando: se publican módulos nuevos y correcciones. Para traer esos
+cambios usas `git pull`. Como tú también modificas archivos (tus soluciones), guarda primero
+tu avance con un _commit_:
+
+```sh
+git add .                               # prepara todos tus cambios
+git commit -m "Resuelvo ejercicios del módulo 1"
+git pull                                # trae lo nuevo del repositorio del curso
+```
+
+`git status` te dice en cualquier momento qué archivos cambiaste.
+
+## Ejemplos
+
+Así se ve `git status` después de resolver un ejercicio y antes de hacer commit:
+
+```txt
+On branch main
+Changes not staged for commit:
+  modified:   ejercicios/basico/00-preparacion/01-saludo/solucion.js
+```
+
+Y así, después del commit:
+
+```txt
+On branch main
+nothing to commit, working tree clean
+```
+
+## Errores comunes
+
+**`git: command not found`** (en PowerShell: _The term 'git' is not recognized_). git no está
+instalado o la terminal se abrió antes de instalarlo. Instálalo y abre una terminal nueva.
+
+**_Please tell me who you are_** al hacer commit. Falta el paso de `git config --global
+user.name` y `user.email`.
+
+**_error: Your local changes to the following files would be overwritten by merge_** al hacer
+`git pull`. Tienes cambios sin guardar en un archivo que también cambió en el curso. Haz
+`git add .` y `git commit` antes del `pull`.
+
+**_CONFLICT (content): Merge conflict in ..._** después del `pull`. Tú y el curso cambiaron las
+mismas líneas del mismo archivo. VS Code marca las zonas en conflicto y te deja elegir con
+qué versión quedarte ("Accept Current" es la tuya). Al terminar, haz `git add .` y
+`git commit`.
+
+**`code: command not found`**. En macOS falta el paso de _Install 'code' command in PATH_; en
+Windows, abre una terminal nueva después de instalar VS Code.
+
+## Ejercicios
+
+Esta lección no tiene tests. Comprueba que:
+
+1. `git --version` muestra una versión.
+2. Tienes la carpeta `curso-node` con el repositorio y la abriste en VS Code.
+3. En la terminal de VS Code (<kbd>Ctrl</kbd> + <kbd>{'`'}</kbd>), `node -v` muestra `v24` o más.
+
+## Para saber más
+
+- [Pro Git, capítulo 2: fundamentos](https://git-scm.com/book/es/v2/Fundamentos-de-Git-Obteniendo-un-repositorio-Git)
+  (libro oficial de git, en español)
+- [VS Code: primeros pasos](https://code.visualstudio.com/docs/getstarted/getting-started)
+- [Extensión ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+  y [extensión Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)

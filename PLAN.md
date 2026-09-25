@@ -8,7 +8,7 @@ Estados: `pendiente` · `en progreso` · `revisado` (solo el profesor marca `rev
 | ----------------------------------------------------- | --------------------------------- |
 | Paso 1: esqueleto, Starlight, CLAUDE.md, PLAN.md y CI | en progreso — listo para revisión |
 | Desplegable "Ver solución" en `<Ejercicio>`           | en progreso — listo para revisión |
-| Paso 2: piloto (módulos 0 y 1 completos)              | pendiente                         |
+| Paso 2: piloto (módulos 0 y 1 completos)              | en progreso — listo para revisión |
 | Paso 3: resto del básico + etapas E1–E3               | pendiente                         |
 | Paso 4: nivel intermedio + etapas E4–E9               | pendiente                         |
 | Paso 5: nivel pro + etapas E10–E17                    | pendiente                         |
@@ -18,15 +18,15 @@ Estados: `pendiente` · `en progreso` · `revisado` (solo el profesor marca `rev
 
 ### Nivel básico — Node sin frameworks
 
-| #   | Módulo                          | Contenido clave                                                                                                                                                   | Proyecto                                        | Estado    |
-| --- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------- |
-| 0   | Preparación                     | Terminal, Node con fnm/nvm, VS Code, git, cómo usar el curso. `npm test` como **caja negra** hasta el módulo 6 (verde = bien, rojo = falta)                       | —                                               | pendiente |
-| 1   | ¿Qué es Node?                   | V8, libuv, REPL, `node archivo.js`, `process.argv`, `process.env`, códigos de salida                                                                              | —                                               | pendiente |
-| 2   | Repaso de JavaScript (opcional) | Repaso **corto y opcional**: desestructuración, spread, clases, closures, errores, `structuredClone`. Enfocado en lo que se usa en Node; los alumnos ya vieron JS | —                                               | pendiente |
-| 3   | Módulos y npm                   | ESM vs CommonJS, `package.json`, scripts, semver, `npx`, lockfile                                                                                                 | E1: CLI de tareas en memoria (`util.parseArgs`) | pendiente |
-| 4   | Asincronía                      | Event loop, callbacks → promesas → `async`/`await`, `Promise.all`, timers, errores asíncronos                                                                     | —                                               | pendiente |
-| 5   | Archivos y rutas                | `node:fs/promises`, `node:path`, JSON, `node:url`, `import.meta.dirname`                                                                                          | E2: persistencia en `tareas.json`               | pendiente |
-| 6   | Pruebas con `node:test`         | `test`, `describe`, `assert`, `--watch`, TDD básico. Aquí se "abre la caja negra" de `npm test`                                                                   | E3: suite de tests de la CLI                    | pendiente |
+| #   | Módulo                          | Contenido clave                                                                                                                                                   | Proyecto                                        | Estado                            |
+| --- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------- |
+| 0   | Preparación                     | Terminal, Node con fnm/nvm, VS Code, git, cómo usar el curso. `npm test` como **caja negra** hasta el módulo 6 (verde = bien, rojo = falta)                       | —                                               | en progreso — listo para revisión |
+| 1   | ¿Qué es Node?                   | V8, libuv, REPL, `node archivo.js`, `process.argv`, `process.env`, códigos de salida                                                                              | —                                               | en progreso — listo para revisión |
+| 2   | Repaso de JavaScript (opcional) | Repaso **corto y opcional**: desestructuración, spread, clases, closures, errores, `structuredClone`. Enfocado en lo que se usa en Node; los alumnos ya vieron JS | —                                               | pendiente                         |
+| 3   | Módulos y npm                   | ESM vs CommonJS, `package.json`, scripts, semver, `npx`, lockfile                                                                                                 | E1: CLI de tareas en memoria (`util.parseArgs`) | pendiente                         |
+| 4   | Asincronía                      | Event loop, callbacks → promesas → `async`/`await`, `Promise.all`, timers, errores asíncronos                                                                     | —                                               | pendiente                         |
+| 5   | Archivos y rutas                | `node:fs/promises`, `node:path`, JSON, `node:url`, `import.meta.dirname`                                                                                          | E2: persistencia en `tareas.json`               | pendiente                         |
+| 6   | Pruebas con `node:test`         | `test`, `describe`, `assert`, `--watch`, TDD básico. Aquí se "abre la caja negra" de `npm test`                                                                   | E3: suite de tests de la CLI                    | pendiente                         |
 
 ### Nivel intermedio — De script a API
 
@@ -65,3 +65,11 @@ Cierre: proyecto final libre con rúbrica — `pendiente`.
   "Intenta resolverlo antes de ver la solución" y un `<details>` cerrado por defecto con todos los
   archivos de `soluciones/<ruta>/` (`solucion.js` primero). El build falla si falta la solución.
   Probado con contenido temporal (ya eliminado). Listo para revisión.
+- **2026-09-25 — Paso 2 (piloto: módulos 0 y 1).** Módulo 0 (Preparación): 4 lecciones (terminal,
+  instalar Node con fnm, editor y git con `clone`, cómo usar el curso), 2 ejemplos y 2 ejercicios
+  (`saludo`, `iniciales`). Módulo 1 (¿Qué es Node?): 5 lecciones (Node por dentro, REPL y scripts,
+  argumentos, variables de entorno, códigos de salida), 9 ejemplos y 5 ejercicios
+  (`argumentos-de-usuario`, `sumar-argumentos`, `opciones`, `configuracion-desde-env`,
+  `codigo-de-salida` con un `dividir.js` ejecutable). Instrucciones independientes del sistema
+  operativo con pestañas macOS/Linux/Windows sincronizadas (`syncKey="so"`). El sidebar ahora
+  arma un grupo por módulo con el título de su `index.mdx`. Listo para revisión.

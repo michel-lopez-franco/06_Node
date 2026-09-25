@@ -1,0 +1,196 @@
+---
+title: Instalar Node
+description: Instala Node 24 con fnm, un administrador de versiones que funciona en macOS, Linux y Windows.
+sidebar:
+  order: 2
+---
+
+import { Aside, Steps, Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Objetivos
+
+- Instalar fnm, un administrador de versiones de Node.
+- Instalar Node 24 y dejarlo como versión predeterminada.
+- Comprobar la instalación con `node -v` y `npm -v`.
+- Ejecutar un archivo `.js` con Node por primera vez.
+
+## Explicación
+
+**Node** es el programa que ejecuta JavaScript fuera del navegador. Junto con él se instala
+**npm** (_Node Package Manager_), la herramienta para instalar librerías y correr los comandos
+del curso, como `npm test`.
+
+El curso necesita **Node 24 o más reciente**.
+
+### ¿Por qué un administrador de versiones?
+
+Podrías descargar el instalador de nodejs.org, pero ese instalador deja **una sola versión**
+en todo tu sistema y en macOS o Linux a veces pide permisos de administrador para instalar
+paquetes. En la vida real cada proyecto puede necesitar una versión distinta de Node.
+
+Un **administrador de versiones** te deja tener varias versiones instaladas y cambiar entre
+ellas con un comando. Usaremos **[fnm](https://github.com/Schniz/fnm)** (_Fast Node Manager_)
+porque funciona igual en macOS, Linux y Windows.
+
+El repositorio del curso tiene un archivo `.nvmrc` que dice qué versión usa (`24`). fnm lo lee
+y, si lo configuras con `--use-on-cd`, cambia de versión solo al entrar a la carpeta.
+
+<Aside>
+  Si ya usas **nvm** (macOS y Linux) o **nvm-windows**, puedes quedarte con él: instala Node
+  24 con `nvm install 24` y úsalo con `nvm use 24`. El resto del curso funciona igual.
+</Aside>
+
+## Ejemplos
+
+### 1. Instala fnm
+
+<Tabs syncKey="so">
+  <TabItem label="macOS">
+    <Steps>
+
+    1. Instala fnm con el script oficial:
+
+       ```sh
+       curl -fsSL https://fnm.vercel.app/install | bash
+       ```
+
+       Si usas [Homebrew](https://brew.sh/), también sirve `brew install fnm`. En ese caso
+       agrega esta línea al final de tu archivo `~/.zshrc`:
+
+       ```sh
+       eval "$(fnm env --use-on-cd --shell zsh)"
+       ```
+
+    2. Cierra la terminal y abre una nueva para que tome la configuración.
+
+    </Steps>
+  </TabItem>
+  <TabItem label="Linux">
+    <Steps>
+
+    1. El script necesita `curl` y `unzip`. En Ubuntu o Debian:
+
+       ```sh
+       sudo apt install curl unzip
+       ```
+
+    2. Instala fnm con el script oficial. El script agrega la configuración a tu `~/.bashrc`
+       (o al archivo de tu shell):
+
+       ```sh
+       curl -fsSL https://fnm.vercel.app/install | bash
+       ```
+
+    3. Cierra la terminal y abre una nueva.
+
+    </Steps>
+  </TabItem>
+  <TabItem label="Windows">
+    <Steps>
+
+    1. Instala fnm con winget, el instalador de programas de Windows:
+
+       ```powershell
+       winget install Schniz.fnm
+       ```
+
+    2. Permite que PowerShell ejecute tu archivo de configuración (solo afecta a tu usuario):
+
+       ```powershell
+       Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
+       ```
+
+    3. Abre tu archivo de configuración de PowerShell. Si no existe, la primera línea lo crea:
+
+       ```powershell
+       if (-not (Test-Path $PROFILE)) { New-Item $PROFILE -Force }
+       notepad $PROFILE
+       ```
+
+    4. Pega esta línea, guarda y cierra el Bloc de notas:
+
+       ```powershell
+       fnm env --use-on-cd --shell powershell | Out-String | Invoke-Expression
+       ```
+
+    5. Cierra la terminal y abre una nueva.
+
+    </Steps>
+  </TabItem>
+</Tabs>
+
+Comprueba que fnm quedó instalado:
+
+```sh
+fnm --version
+```
+
+### 2. Instala Node 24
+
+Estos comandos son iguales en los tres sistemas:
+
+```sh
+fnm install 24      # descarga e instala Node 24
+fnm default 24      # la deja como versión predeterminada
+node -v             # debe mostrar v24.algo (o más reciente)
+npm -v              # debe mostrar la versión de npm, por ejemplo 11.x
+```
+
+### 3. Tu primer programa
+
+Crea un archivo `hola.js` en tu carpeta `cursos` (con el editor que tengas a mano; en la
+siguiente lección instalas VS Code) con esta única línea:
+
+```js
+console.log('¡Hola desde Node!');
+```
+
+Desde la terminal, en esa carpeta, ejecútalo:
+
+```sh
+node hola.js
+```
+
+Salida esperada:
+
+```txt
+¡Hola desde Node!
+```
+
+Acabas de ejecutar JavaScript sin navegador. En el [módulo 1](../../01-que-es-node/) verás
+qué pasó por dentro.
+
+## Errores comunes
+
+**`fnm: command not found`** (en PowerShell: _The term 'fnm' is not recognized_). La terminal
+no tomó la instalación. Cierra **todas** las terminales y abre una nueva. En Windows, si
+persiste, reinicia la sesión de Windows.
+
+**`node: command not found` después de instalar.** fnm está instalado, pero no está
+configurado en tu shell (el paso de `fnm env`). Revisa que la línea esté en `~/.zshrc`,
+`~/.bashrc` o en tu `$PROFILE` de PowerShell, y abre una terminal nueva.
+
+**_...cannot be loaded because running scripts is disabled on this system_** (Windows). PowerShell
+bloquea scripts por defecto. Ejecuta
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` y abre una terminal nueva.
+
+**`node -v` muestra una versión vieja (v18, v20...).** Hay otra instalación de Node que tiene
+prioridad, casi siempre la del instalador de nodejs.org. Averigua cuál se está usando con
+`which node` (macOS y Linux) o `Get-Command node` (PowerShell) y desinstala esa versión.
+
+**`error: Can't find an installed Node version matching v24`**. Al entrar a la carpeta del
+curso, fnm quiso usar la versión del `.nvmrc` y no la tienes. Ejecuta `fnm install`.
+
+## Ejercicios
+
+Esta lección no tiene tests. Comprueba que:
+
+1. `node -v` muestra `v24` o más.
+2. `node hola.js` imprime el saludo.
+
+## Para saber más
+
+- [Descargar Node.js](https://nodejs.org/es/download) (documentación oficial, con las
+  distintas formas de instalar)
+- [Versiones de Node y su soporte](https://nodejs.org/es/about/previous-releases)
+- [fnm en GitHub](https://github.com/Schniz/fnm)

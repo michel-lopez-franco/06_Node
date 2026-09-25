@@ -1,0 +1,134 @@
+---
+title: Argumentos de la terminal
+description: Lee con process.argv los argumentos que recibe tu programa y conviértelos al tipo que necesitas.
+sidebar:
+  order: 3
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Explicar qué contiene cada posición de `process.argv`.
+- Obtener solo los argumentos del usuario con `slice(2)`.
+- Convertir argumentos de texto a número y detectar cuando no son válidos.
+- Leer opciones con la forma `--nombre valor` y `--nombre=valor`.
+
+## Explicación
+
+### `process` y `process.argv`
+
+**`process`** es un objeto global de Node que representa al programa en ejecución: su
+versión, su sistema operativo, sus argumentos, sus variables de entorno y cómo termina. No
+necesitas importarlo.
+
+Cuando ejecutas `node app.js hola 42`, Node guarda todo en **`process.argv`** (_argument
+vector_), un arreglo de textos:
+
+| Posición | Valor (ejemplo)                    | Qué es                        |
+| -------- | ---------------------------------- | ----------------------------- |
+| `[0]`    | `/usr/local/bin/node`              | La ruta del ejecutable de Node |
+| `[1]`    | `/home/ana/app.js`                 | La ruta completa de tu script |
+| `[2]`    | `'hola'`                           | El primer argumento del usuario |
+| `[3]`    | `'42'`                             | El segundo                    |
+
+Las dos primeras posiciones siempre están, así que los argumentos del usuario se obtienen con
+`process.argv.slice(2)`.
+
+### Todo llega como texto
+
+La terminal solo maneja texto: `42` llega como `'42'`. Si lo necesitas como número,
+conviértelo con `Number()`. Si el texto no es un número, `Number()` devuelve `NaN`, que se
+detecta con `Number.isNaN()`. Hay una trampa: `Number('')` devuelve `0`, no `NaN`.
+
+### Espacios y comillas
+
+La terminal separa los argumentos por espacios. Para que un argumento tenga espacios, ponlo
+entre comillas: `node app.js "Ana López"` recibe un solo argumento, `'Ana López'`.
+
+### Opciones y banderas
+
+Los programas de terminal suelen aceptar **opciones** con nombre, como `--nombre Ana` o
+`--nombre=Ana`, y **banderas** (_flags_) que solo están o no están, como `--verbose`. En el
+ejercicio 3 las lees a mano para entender cómo funcionan. En el módulo 3 usarás
+`util.parseArgs`, que Node trae incluido y hace ese trabajo por ti.
+
+## Ejemplos
+
+<Ejemplo archivo="basico/01-que-es-node/03-argv.js" />
+
+Desde `ejemplos/basico/01-que-es-node`:
+
+```sh
+node 03-argv.js hola 42 --rapido
+```
+
+Salida esperada (las rutas cambian según tu computadora):
+
+```txt
+process.argv completo:
+  [0] /usr/local/bin/node
+  [1] /Users/ana/cursos/curso-node/ejemplos/basico/01-que-es-node/03-argv.js
+  [2] hola
+  [3] 42
+  [4] --rapido
+Lo que escribió el usuario: [ 'hola', '42', '--rapido' ]
+¿De qué tipo es "42"? string
+```
+
+En Windows las rutas se ven como `C:\Users\ana\...\node.exe`.
+
+<Ejemplo archivo="basico/01-que-es-node/04-sumar-argumentos.js" />
+
+```sh
+node 04-sumar-argumentos.js 10 20 12.5
+```
+
+Salida esperada:
+
+```txt
+Sin convertir: 1020
+Convirtiendo con Number(): 42.5
+```
+
+Prueba también `node 04-sumar-argumentos.js 10 hola`: la suma sale `NaN`, porque
+`Number('hola')` es `NaN` y cualquier operación con `NaN` da `NaN`. En el ejercicio 2 lo
+detectas y avisas con un error.
+
+## Errores comunes
+
+**La suma da `1020` en lugar de `30`.** Estás sumando textos: `'10' + '20'` los une. Convierte
+cada argumento con `Number()` antes de sumar.
+
+**El resultado es `NaN`.** Algún argumento no es un número (`'hola'`, `'10,5'` con coma en
+lugar de punto). Valida con `Number.isNaN()` y muestra un mensaje claro.
+
+**`process.argv[2]` es `undefined`.** El usuario no pasó argumentos. Revisa que existan antes
+de usarlos.
+
+**Recibes `['Ana', 'López']` en lugar de `['Ana López']`.** Faltaron las comillas en la
+terminal: `node app.js "Ana López"`.
+
+## Ejercicios
+
+En estos ejercicios las funciones reciben el arreglo como parámetro en lugar de leer
+`process.argv` directamente. Así los tests pueden probarlas con los datos que quieran.
+
+<Ejercicio ruta="basico/01-que-es-node/01-argumentos-de-usuario" />
+
+<Ejercicio ruta="basico/01-que-es-node/02-sumar-argumentos">
+  Pista: un ciclo `for...of` y `throw new Error(...)` para avisar del texto inválido.
+</Ejercicio>
+
+<Ejercicio ruta="basico/01-que-es-node/03-opciones">
+  Pista: `startsWith()` y `slice()` para la forma `--nombre=Ana`, y la posición `i + 1` para
+  la forma `--nombre Ana`.
+</Ejercicio>
+
+## Para saber más
+
+- [`process.argv`](https://nodejs.org/docs/latest-v24.x/api/process.html#processargv)
+  (documentación oficial)
+- [`util.parseArgs`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilparseargsconfig),
+  que usarás en el módulo 3

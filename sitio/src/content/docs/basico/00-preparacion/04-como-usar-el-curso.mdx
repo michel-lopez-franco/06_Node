@@ -1,0 +1,222 @@
+---
+title: Cómo usar el curso
+description: Cómo están organizados el sitio y el repositorio, y cómo resolver y comprobar un ejercicio con npm test.
+sidebar:
+  order: 4
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Ubicar en el repositorio los ejemplos, los ejercicios y las soluciones de cada lección.
+- Ejecutar un ejemplo con `node`.
+- Resolver un ejercicio y comprobarlo con `npm test`.
+- Leer un resultado en rojo para saber qué te falta.
+
+## Explicación
+
+### Cómo está organizado el curso
+
+Cada **módulo** tiene varias **lecciones** en este sitio. Todas siguen el mismo orden:
+objetivos, explicación, ejemplos, errores comunes, ejercicios y enlaces para saber más.
+
+El código vive en el repositorio que clonaste, en carpetas que siguen la misma estructura que
+el sitio:
+
+| Carpeta       | Qué contiene                                                   | ¿La editas? |
+| ------------- | -------------------------------------------------------------- | ----------- |
+| `ejemplos/`   | El código que aparece en las lecciones, listo para ejecutarse | No (puedes experimentar) |
+| `ejercicios/` | Lo que tú resuelves: un `solucion.js` incompleto y sus tests   | **Sí**, el `solucion.js` |
+| `soluciones/` | Soluciones de referencia, comentadas                           | No          |
+| `proyecto/`   | La API de tareas que construyes a lo largo del curso          | Desde el módulo 3 |
+
+Por ejemplo, la lección que estás leyendo es `basico/00-preparacion`, sus ejemplos están en
+`ejemplos/basico/00-preparacion/` y sus ejercicios en `ejercicios/basico/00-preparacion/`.
+
+### Anatomía de un ejercicio
+
+Cada ejercicio es una carpeta con tres archivos:
+
+- `README.md`: el enunciado corto (el mismo que ves en la lección).
+- `solucion.js`: una función con su descripción y un cuerpo que por ahora solo lanza el error
+  `Ejercicio sin resolver`. **Aquí escribes tu código.**
+- `solucion.test.js`: los tests, un programa que llama a tu función con distintos datos y
+  revisa que devuelva lo correcto. **No lo modifiques.**
+
+<Aside title="La palabra export">
+  Las funciones de `solucion.js` empiezan con `export function`. `export` permite que los
+  tests usen tu función; lo veremos en el módulo 3. Por ahora, solo escribe dentro de la
+  función.
+</Aside>
+
+### `npm test` como caja negra
+
+Hasta el módulo 6 vas a usar los tests como una **caja negra**: no necesitas saber cómo están
+escritos, solo leer el resultado. Cada línea es una prueba con una descripción en español de
+lo que se espera:
+
+- **✔ en verde:** ese caso ya funciona.
+- **✖ en rojo:** ese caso todavía no. La descripción te dice qué se esperaba.
+
+En el módulo 6 abrimos la caja y aprendes a escribir tus propios tests.
+
+Desde la carpeta raíz del repositorio (`curso-node`) puedes correr:
+
+```sh
+npm test                                              # todos los ejercicios
+npm test -- ejercicios/basico/00-preparacion          # los de un módulo
+npm test -- ejercicios/basico/00-preparacion/01-saludo  # uno solo
+```
+
+Los `--` separan los argumentos de npm de los que van al comando de pruebas.
+
+### Las soluciones
+
+Cada ejercicio tiene una solución de referencia en `soluciones/` y en el desplegable
+**"Ver solución"** debajo de cada ejercicio de este sitio. Están comentadas para explicar el
+porqué de cada decisión.
+
+Úsalas **después** de intentarlo: cuando tus tests ya pasen, para comparar tu enfoque, o
+cuando lleves un buen rato atorado. Leer la solución antes de intentarlo se siente productivo,
+pero no te enseña a resolver problemas.
+
+## Ejemplos
+
+Desde la raíz del repositorio, entra a la carpeta de ejemplos de este módulo y ejecuta el
+primero:
+
+<Ejemplo archivo="basico/00-preparacion/01-hola-mundo.js" />
+
+```sh
+cd ejemplos/basico/00-preparacion
+node 01-hola-mundo.js
+```
+
+Salida esperada:
+
+```txt
+¡Hola desde Node!
+Si ves este mensaje, Node está instalado y funcionando.
+```
+
+El segundo revisa que tu versión de Node sirva para el curso:
+
+<Ejemplo archivo="basico/00-preparacion/02-mi-entorno.js" />
+
+```sh
+node 02-mi-entorno.js
+```
+
+Salida esperada (los valores cambian según tu computadora; en Windows el sistema aparece como
+`win32`, en macOS como `darwin` y en Linux como `linux`):
+
+```txt
+Versión de Node: v24.7.0
+Sistema operativo: darwin
+Carpeta actual: /Users/ana/cursos/curso-node/ejemplos/basico/00-preparacion
+✓ Tu versión de Node sirve para el curso.
+```
+
+### El ciclo de un ejercicio
+
+<Steps>
+
+1. Regresa a la raíz del repositorio (`cd ../../..`) y corre los tests del primer ejercicio.
+   Todo sale en rojo porque la función todavía no está resuelta:
+
+   ```txt
+   ▶ saludar
+     ✖ con "Ana" devuelve "¡Hola, Ana!"
+     ✖ con "Luis" devuelve "¡Hola, Luis!"
+     ✖ quita los espacios de más: con "  Sofía  " devuelve "¡Hola, Sofía!"
+     ✖ con texto vacío ("") devuelve "¡Hola, mundo!"
+     ✖ con puros espacios ("   ") devuelve "¡Hola, mundo!"
+     ✖ sin nombre, saludar() devuelve "¡Hola, mundo!"
+   ℹ pass 0
+   ℹ fail 6
+   ...
+   Error: Ejercicio sin resolver: completa esta función
+   ```
+
+2. Abre `ejercicios/basico/00-preparacion/01-saludo/solucion.js`, borra la línea del
+   `throw` y escribe tu solución. Supón que tu primer intento solo arma el texto con el
+   nombre. Al correr los tests otra vez, algunos pasan y otros no:
+
+   ```txt
+   ▶ saludar
+     ✔ con "Ana" devuelve "¡Hola, Ana!"
+     ✔ con "Luis" devuelve "¡Hola, Luis!"
+     ✖ quita los espacios de más: con "  Sofía  " devuelve "¡Hola, Sofía!"
+     ✖ con texto vacío ("") devuelve "¡Hola, mundo!"
+     ...
+   ```
+
+3. Baja hasta la sección **failing tests** para ver el detalle de cada caso en rojo. La línea
+   con `+` es lo que devolvió tu función (_actual_) y la línea con `-` es lo que se esperaba
+   (_expected_):
+
+   ```txt
+   ✖ quita los espacios de más: con "  Sofía  " devuelve "¡Hola, Sofía!"
+     AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+     + actual - expected
+
+     + '¡Hola,   Sofía  !'
+     - '¡Hola, Sofía!'
+   ```
+
+   Aquí se ve que te faltó quitar los espacios del nombre.
+
+4. Corrige y repite hasta que todo esté en verde:
+
+   ```txt
+   ✔ saludar
+   ℹ pass 6
+   ℹ fail 0
+   ```
+
+5. Compara con la solución de referencia y guarda tu avance con `git commit`.
+
+</Steps>
+
+## Errores comunes
+
+**`npm error Missing script: "test"`** o **`npm error enoent Could not read package.json`**.
+No estás en la raíz del repositorio. Usa `pwd` y regresa a `curso-node` con `cd`.
+
+**`No encontré tests en "ejercicios/basico/00-preparacion/01-saludos"`**. La ruta tiene un
+error de dedo. Usa <kbd>Tab</kbd> para autocompletarla.
+
+**`SyntaxError: Unexpected token`** o **`SyntaxError: missing ) after argument list`** en la
+salida de los tests. Tu `solucion.js` tiene un error de sintaxis (un paréntesis o una llave
+sin cerrar, una comilla de más) y ningún test se puede ejecutar. La salida indica el archivo y
+la línea; ESLint también lo marca en rojo en VS Code.
+
+**`Error: Ejercicio sin resolver: completa esta función`** en un ejercicio que ya resolviste.
+Se quedó la línea `throw new Error(...)` antes de tu código. Bórrala.
+
+**Todos los tests pasan, pero el de otro ejercicio sale en rojo.** `npm test` sin ruta corre
+**todos** los ejercicios, incluidos los que no has resuelto. Pasa la ruta del ejercicio que te
+interesa.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/00-preparacion/01-saludo">
+  Tu primer ejercicio: sigue el ciclo de arriba paso a paso.
+</Ejercicio>
+
+<Ejercicio ruta="basico/00-preparacion/02-iniciales">
+  Pista: los textos tienen `split()` para partirlos en palabras, y los arreglos tienen
+  `filter()`, `map()` y `join()`.
+</Ejercicio>
+
+## Para saber más
+
+- [Documentación de Node.js](https://nodejs.org/docs/latest-v24.x/api/) (la referencia que
+  usarás durante todo el curso)
+- [Aprende Node.js](https://nodejs.org/es/learn/getting-started/introduction-to-nodejs)
+  (guías oficiales)
+- [Referencia de JavaScript en MDN](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference)
+  (para repasar métodos como `split`, `map` o `filter`)

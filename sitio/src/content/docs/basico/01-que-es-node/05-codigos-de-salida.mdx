@@ -1,0 +1,176 @@
+---
+title: Códigos de salida
+description: Termina tus programas con el código de salida correcto, usa stderr para los errores y consulta el código en tu terminal.
+sidebar:
+  order: 5
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Explicar qué significa un código de salida 0 y uno distinto de 0.
+- Consultar el código de salida del último comando en tu terminal.
+- Elegir entre `process.exitCode` y `process.exit()`.
+- Enviar los mensajes de error a stderr con `console.error`.
+
+## Explicación
+
+### El código de salida
+
+Cuando un programa termina, le entrega al sistema operativo un número: su **código de
+salida** (_exit code_).
+
+- **`0`** significa "todo salió bien".
+- **Cualquier otro número** significa "algo falló". Por convención, `1` es un error general y
+  `2` indica que el programa se usó mal (faltan o sobran argumentos).
+
+Los humanos casi nunca lo ven, pero otros programas sí: `npm test` termina con código 1 cuando
+falla algún test, y así la integración continua (CI) sabe que debe marcar el cambio en rojo.
+Un script que falla y termina con 0 engaña a quien lo usa.
+
+### Ver el código del último comando
+
+<Tabs syncKey="so">
+  <TabItem label="macOS">
+    ```sh
+    node app.js
+    echo $?
+    ```
+  </TabItem>
+  <TabItem label="Linux">
+    ```sh
+    node app.js
+    echo $?
+    ```
+  </TabItem>
+  <TabItem label="Windows">
+    ```powershell
+    node app.js
+    $LASTEXITCODE
+    ```
+  </TabItem>
+</Tabs>
+
+### `process.exitCode` y `process.exit()`
+
+- **`process.exitCode = 1`** fija el código con el que terminará el programa, pero deja que
+  termine lo pendiente (mensajes por imprimir, temporizadores). **Es la opción recomendada.**
+- **`process.exit(1)`** termina el programa en ese instante. Lo que esté pendiente se pierde,
+  incluso mensajes que aún no se terminaban de escribir.
+
+Si no fijas nada, Node termina con `0`. Si ocurre un error que nadie captura (un `throw` fuera
+de un `try...catch`), Node muestra el error y termina con `1`.
+
+### stdout y stderr
+
+Un programa tiene dos salidas de texto:
+
+- **stdout** (salida estándar): los resultados. `console.log` escribe aquí.
+- **stderr** (salida de errores): los errores y avisos. `console.error` escribe aquí.
+
+En la terminal ambas se ven igual, pero se pueden separar. Por ejemplo,
+`node app.js > resultado.txt` guarda en el archivo solo lo de stdout, y los errores se siguen
+viendo en pantalla.
+
+## Ejemplos
+
+Todos se ejecutan desde `ejemplos/basico/01-que-es-node`.
+
+### Un error de uso con código 2
+
+<Ejemplo archivo="basico/01-que-es-node/06-salida-con-error.js" />
+
+```sh
+node 06-salida-con-error.js
+echo $?            # en PowerShell: $LASTEXITCODE
+```
+
+```txt
+Error: falta el nombre.
+Uso: node 06-salida-con-error.js <nombre>
+2
+```
+
+Con `node 06-salida-con-error.js Ana`, imprime `Hola, Ana` y el código es `0`.
+
+### `exitCode` deja terminar lo pendiente
+
+<Ejemplo archivo="basico/01-que-es-node/07-exitcode.js" />
+
+```txt
+1. Ya pusimos exitCode = 1, pero el programa sigue hasta terminar su trabajo.
+2. Esto sí se imprime: Node esperó al temporizador antes de salir.
+```
+
+El código de salida es `1`. `setTimeout` funciona igual que en el navegador; en el módulo 4
+verás por qué Node espera a los temporizadores antes de terminar.
+
+### `exit()` corta en seco
+
+<Ejemplo archivo="basico/01-que-es-node/08-exit-inmediato.js" />
+
+```txt
+Voy a llamar a process.exit(0)...
+```
+
+El mensaje del temporizador nunca aparece.
+
+### Un error sin capturar
+
+<Ejemplo archivo="basico/01-que-es-node/09-error-no-capturado.js" />
+
+```txt
+Edad: 20
+file:///.../09-error-no-capturado.js:8
+    throw new Error(`"${texto}" no es una edad válida`);
+          ^
+
+Error: "veinte" no es una edad válida
+    at leerEdad (file:///.../09-error-no-capturado.js:8:11)
+    at file:///.../09-error-no-capturado.js:14:22
+    ...
+
+Node.js v24.7.0
+```
+
+El código de salida es `1`. El _stack trace_ (las líneas que empiezan con `at`) indica el
+camino que siguió el programa hasta el error: se lee de arriba abajo, del lugar donde se lanzó
+hacia quien llamó a esa función. `:8:11` significa línea 8, columna 11.
+
+<Aside type="tip">
+  Separa la lógica del programa de la salida. Una función que **decide** el código y el
+  mensaje se puede probar; la parte que imprime y fija `process.exitCode` queda en unas pocas
+  líneas al final. Es lo que haces en el ejercicio.
+</Aside>
+
+## Errores comunes
+
+**El programa muestra un error, pero `echo $?` da `0`.** Imprimiste el error con
+`console.error` pero no fijaste el código. Agrega `process.exitCode = 1`.
+
+**Faltan mensajes al final de la salida.** Llamaste `process.exit()` mientras quedaba trabajo
+pendiente. Usa `process.exitCode` y deja que el programa termine solo.
+
+**`$?` no muestra el código en Windows.** En PowerShell, `$?` solo dice `True` o `False`. El
+número está en `$LASTEXITCODE`.
+
+**`echo $?` da `0` aunque el programa falló.** Entre el programa y el `echo` ejecutaste otro
+comando; `$?` siempre es el código del **último**. Consúltalo justo después.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/01-que-es-node/05-codigo-de-salida">
+  La carpeta incluye `dividir.js`, un programa completo que usa tu función. Cuando tus tests
+  pasen, ejecútalo con distintos argumentos y revisa el código de salida en tu terminal.
+</Ejercicio>
+
+## Para saber más
+
+- [`process.exitCode`](https://nodejs.org/docs/latest-v24.x/api/process.html#processexitcode_1)
+  y [`process.exit()`](https://nodejs.org/docs/latest-v24.x/api/process.html#processexitcode)
+  (documentación oficial)
+- [Códigos de salida de Node](https://nodejs.org/docs/latest-v24.x/api/process.html#exit-codes)
+- [`console.error` y la salida de errores](https://nodejs.org/docs/latest-v24.x/api/console.html#consoleerrordata-args)

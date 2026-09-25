@@ -1,0 +1,133 @@
+---
+title: La terminal
+description: Lo mínimo de la terminal para trabajar con Node en macOS, Linux o Windows.
+sidebar:
+  order: 1
+---
+
+import { Aside, Tabs, TabItem } from '@astrojs/starlight/components';
+
+## Objetivos
+
+- Abrir una terminal en tu sistema operativo.
+- Saber en qué carpeta estás y moverte a otra con `cd`.
+- Listar el contenido de una carpeta y crear carpetas nuevas.
+- Distinguir una ruta relativa de una ruta absoluta.
+
+## Explicación
+
+La **terminal** (también se le llama consola o línea de comandos) es un programa en el que
+escribes órdenes en lugar de hacer clic. Node se usa casi siempre desde ahí: para ejecutar
+tus programas, instalar paquetes y correr pruebas.
+
+El programa que interpreta lo que escribes se llama **_shell_**. En macOS el predeterminado es
+zsh, en Linux suele ser bash y en Windows usaremos PowerShell. Los comandos básicos de este
+curso funcionan igual en los tres, salvo algunos detalles que se indican con pestañas.
+
+### Abrir la terminal
+
+<Tabs syncKey="so">
+  <TabItem label="macOS">
+    Abre **Terminal** desde Spotlight (<kbd>Cmd</kbd> + <kbd>Espacio</kbd>, escribe
+    "Terminal").
+  </TabItem>
+  <TabItem label="Linux">
+    Abre la terminal de tu distribución; en la mayoría funciona <kbd>Ctrl</kbd> +
+    <kbd>Alt</kbd> + <kbd>T</kbd>.
+  </TabItem>
+  <TabItem label="Windows">
+    Abre **Terminal** desde el menú Inicio (en Windows 10, instala "Windows Terminal" desde
+    la Microsoft Store). Revisa que la pestaña diga **PowerShell**, no "Símbolo del sistema"
+    (cmd).
+  </TabItem>
+</Tabs>
+
+También puedes usar la terminal integrada de VS Code (<kbd>Ctrl</kbd> + <kbd>{'`'}</kbd>), que se
+abre directamente en la carpeta de tu proyecto.
+
+### La carpeta actual
+
+La terminal siempre está "parada" en una carpeta, la **carpeta actual** (en inglés,
+_working directory_). Los comandos que escribes trabajan sobre ella. Para saber cuál es, usa
+`pwd` (_print working directory_). Funciona en los tres sistemas.
+
+### Comandos esenciales
+
+| Comando              | Qué hace                                         |
+| -------------------- | ------------------------------------------------ |
+| `pwd`                | Muestra la carpeta actual                        |
+| `ls`                 | Lista lo que hay en la carpeta actual            |
+| `cd carpeta`         | Entra a `carpeta`                                |
+| `cd ..`              | Sube a la carpeta de arriba                      |
+| `cd ~`               | Va a tu carpeta personal                         |
+| `mkdir nombre`       | Crea una carpeta                                 |
+| `clear`              | Limpia la pantalla                               |
+| <kbd>Tab</kbd>       | Autocompleta nombres de carpetas y archivos      |
+| <kbd>↑</kbd>         | Recupera el comando anterior                     |
+| <kbd>Ctrl</kbd>+<kbd>C</kbd> | Detiene el programa que se está ejecutando |
+
+PowerShell acepta `ls`, `pwd`, `cd`, `mkdir` y `clear` como atajos de sus propios comandos,
+así que puedes usarlos tal cual.
+
+### Rutas relativas y absolutas
+
+Una **ruta** indica dónde está un archivo o carpeta.
+
+- Una **ruta absoluta** empieza desde la raíz del disco y funciona sin importar dónde estés:
+  `/Users/ana/cursos` (macOS), `/home/ana/cursos` (Linux) o `C:\Users\ana\cursos` (Windows).
+- Una **ruta relativa** parte de la carpeta actual: `ejemplos/basico` significa "la carpeta
+  `ejemplos`, dentro de donde estoy". `..` significa "la carpeta de arriba" y `.` significa
+  "la carpeta actual".
+
+Windows separa las carpetas con `\` y macOS y Linux con `/`. En PowerShell puedes escribir
+`/` y también funciona, así que en este curso siempre usaremos `/`.
+
+<Aside type="caution" title="Espacios en los nombres">
+  Si una carpeta tiene espacios (`Mis Documentos`), escribe la ruta entre comillas:
+  `cd "Mis Documentos"`. Para tus proyectos, evita espacios y acentos en los nombres de
+  carpetas: te ahorrarás problemas con muchas herramientas.
+</Aside>
+
+## Ejemplos
+
+Una sesión típica: crear una carpeta de trabajo, entrar en ella y regresar.
+
+```sh
+pwd                 # ¿dónde estoy?
+mkdir cursos        # crea la carpeta "cursos"
+cd cursos           # entra
+pwd                 # ahora estás en .../cursos
+cd ..               # regresa a la carpeta de arriba
+ls                  # ves "cursos" en la lista
+```
+
+Todo lo que va después de `#` es un comentario: la terminal lo ignora, y aquí lo usamos para
+explicar cada línea. No hace falta que lo escribas.
+
+## Errores comunes
+
+**`cd: no such file or directory: curos`** (en PowerShell: _Cannot find path ... because it
+does not exist_). Escribiste mal el nombre o no estás en la carpeta que crees. Revisa con `pwd`
+y `ls`, y usa <kbd>Tab</kbd> para autocompletar en lugar de escribir el nombre completo.
+
+**La terminal "se quedó pegada" y no acepta comandos.** Probablemente hay un programa en
+ejecución (por ejemplo, un servidor). Presiona <kbd>Ctrl</kbd> + <kbd>C</kbd> para detenerlo.
+
+**En Windows, un comando del curso no funciona.** Revisa que estés en PowerShell y no en cmd
+(la línea de comandos suele empezar con `PS C:\...`).
+
+## Ejercicios
+
+Esta lección no tiene tests. Practica en tu terminal:
+
+1. Averigua cuál es tu carpeta personal con `cd ~` y `pwd`.
+2. Crea una carpeta `cursos` en tu carpeta personal. Ahí vas a clonar el repositorio del curso
+   en la lección [Editor y git](../03-editor-y-git/).
+3. Entra a `cursos`, sube con `cd ..` y vuelve a entrar usando <kbd>Tab</kbd> para autocompletar.
+
+## Para saber más
+
+- [The Linux command line for beginners](https://ubuntu.com/tutorials/command-line-for-beginners)
+  (Ubuntu, sirve también para macOS)
+- [Documentación de PowerShell](https://learn.microsoft.com/es-es/powershell/scripting/overview)
+- [Windows Terminal](https://learn.microsoft.com/es-es/windows/terminal/)

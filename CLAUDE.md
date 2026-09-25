@@ -34,7 +34,8 @@ docker compose up -d        # PostgreSQL 17 (módulos 11+). Usuario/clave/BD: cu
 ## Mapa del repositorio
 
 - `sitio/` — Astro Starlight. Lecciones en `sitio/src/content/docs/{basico,intermedio,pro}/NN-modulo/`,
-  páginas del proyecto en `.../proyecto/`. El sidebar se autogenera por carpeta (`astro.config.mjs`).
+  páginas del proyecto en `.../proyecto/`. El sidebar se autogenera por carpeta (`astro.config.mjs`):
+  cada módulo es un grupo rotulado "N. <title de su index.mdx>", así que el `index.mdx` es obligatorio.
 - `ejemplos/<nivel>/<NN-modulo>/<NN-nombre>.js` — todo el código que aparece en las lecciones.
 - `ejercicios/<nivel>/<NN-modulo>/<NN-nombre>/` — `README.md` (enunciado corto), `solucion.js`
   (stub), `solucion.test.js`.
