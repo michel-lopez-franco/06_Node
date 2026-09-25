@@ -2,14 +2,16 @@
 
 Curso de Node.js para Ingeniería en Computación (CUCEI), de cero a nivel profesional, en modo
 **autoestudio** (sin calendario). Los alumnos ya cursaron HTML, CSS, JavaScript y Tailwind.
-Entregable: sitio Astro Starlight en español + ejemplos ejecutables + ejercicios con `node:test`
-
-- un proyecto hilo conductor (API de tareas y proyectos).
+Entregable: sitio Astro Starlight en español, ejemplos ejecutables, ejercicios con `node:test` y
+un proyecto hilo conductor (API de tareas y proyectos).
 
 El temario y el estado de cada módulo están en `PLAN.md`. **Actualiza `PLAN.md` al terminar cada
 tarea** (estado del módulo y registro de avances). Estados: `pendiente`, `en progreso`,
 `revisado`. Solo el profesor marca un módulo como `revisado`; al terminar tú lo dejas en
 `en progreso` con la nota "listo para revisión".
+
+**No modifiques un módulo marcado como `revisado` sin preguntar primero**, aunque encuentres algo
+que mejorar: propón el cambio y espera aprobación.
 
 ## Comandos
 
@@ -37,7 +39,7 @@ docker compose up -d        # PostgreSQL 17 (módulos 11+). Usuario/clave/BD: cu
 - `ejercicios/<nivel>/<NN-modulo>/<NN-nombre>/` — `README.md` (enunciado corto), `solucion.js`
   (stub), `solucion.test.js`.
 - `soluciones/` — **espejo exacto** de las rutas de `ejercicios/`; solo contiene los archivos que
-  reemplazan al stub.
+  reemplazan al stub. Son públicas: los alumnos las consultan para comparar.
 - `proyecto/etapa-NN-nombre/` — cada etapa completa y ejecutable, con su `package.json`, tests y README.
 - `scripts/` — scripts del repo (Node puro, sin dependencias).
 
@@ -77,7 +79,10 @@ Frontmatter: `title`, `description`, `sidebar.order`. Secciones, en este orden:
 Componentes propios (`sitio/src/components/`):
 
 - `<Ejemplo archivo="basico/04-asincronia/01-callbacks.js" />` — muestra el archivo real de `ejemplos/`.
-- `<Ejercicio ruta="basico/04-asincronia/01-nombre">texto opcional</Ejercicio>` — tarjeta con el comando de prueba.
+- `<Ejercicio ruta="basico/04-asincronia/01-nombre">texto opcional</Ejercicio>` — tarjeta con el
+  comando de prueba y, debajo, un bloque desplegable **"Ver solución"** (cerrado por defecto) que
+  muestra el archivo real de `soluciones/`, precedido del aviso "Intenta resolverlo antes de ver
+  la solución".
   Ambos rompen el build si la ruta no existe.
 
 Enlaces internos **relativos** (`../temario/`), para que funcionen si luego se configura `base`.
@@ -96,9 +101,18 @@ Enlaces internos **relativos** (`../temario/`), para que funcionen si luego se c
 - Stub: funciones exportadas con JSDoc y cuerpo `throw new Error('Ejercicio sin resolver…')`.
 - Tests: describen el comportamiento, nombres en español, `node:assert/strict`, incluyen casos
   borde. Deben fallar con el stub y pasar con la solución (`npm run test:soluciones` lo verifica).
-- **Las soluciones nunca se publican en el sitio** ni se importan desde `sitio/`.
 - Hasta el módulo 6, los alumnos usan `npm test` como **caja negra** (verde = bien, rojo = falta).
   Los tests de esos módulos deben tener mensajes que se entiendan sin saber leer código de pruebas.
+
+## Soluciones
+
+- Las soluciones **son visibles para los alumnos**: en el repo (`soluciones/`) y en el sitio,
+  dentro del desplegable "Ver solución" de `<Ejercicio>`. Nunca se muestran abiertas por defecto.
+- Cada solución está **comentada para enseñar**: explica las decisiones importantes (por qué este
+  enfoque, qué caso borde se cuida) y, cuando aplique, menciona una alternativa válida y su
+  ventaja o desventaja.
+- Las soluciones respetan las mismas reglas de progresión que las lecciones: solo usan lo que el
+  alumno ya vio hasta ese módulo.
 
 ## Proyecto (API de tareas)
 

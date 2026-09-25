@@ -1,12 +1,13 @@
 ---
-// Tarjeta que enlaza una lección con su ejercicio en ejercicios/.
-// Falla el build si el ejercicio no existe, para que no queden referencias rotas.
+// Tarjeta que enlaza una lección con su ejercicio en ejercicios/ y, debajo, un desplegable
+// "Ver solución" (cerrado por defecto) con los archivos reales de soluciones/.
+// Falla el build si el ejercicio o su solución no existen, para que no queden referencias rotas.
 //
 //   <Ejercicio ruta="basico/04-asincronia/01-leer-con-promesas" />
-import { Aside } from '@astrojs/starlight/components';
+import { Aside, Code } from '@astrojs/starlight/components';
 
 interface Props {
-  /** Ruta relativa a ejercicios/ */
+  /** Ruta relativa a ejercicios/ (y a soluciones/, que es su espejo) */
   ruta: string;
 }
 
@@ -16,12 +17,33 @@ const enunciados = import.meta.glob<string>('../../../ejercicios/**/README.md', 
   eager: true,
 });
 
+const archivosDeSoluciones = import.meta.glob<string>('../../../soluciones/**/*', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+});
+
 const { ruta } = Astro.props;
+
 const enunciado = enunciados[`../../../ejercicios/${ruta}/README.md`];
 if (enunciado === undefined) {
   throw new Error(`<Ejercicio>: no existe ejercicios/${ruta}/README.md`);
 }
 const titulo = enunciado.match(/^#\s+(.+)$/m)?.[1] ?? ruta;
+
+// Una solución puede reemplazar varios archivos del stub; solucion.js va primero.
+const prefijo = `../../../soluciones/${ruta}/`;
+const soluciones = Object.entries(archivosDeSoluciones)
+  .filter(([clave]) => clave.startsWith(prefijo))
+  .map(([clave, codigo]) => ({ archivo: clave.slice(prefijo.length), codigo }))
+  .sort((a, b) => {
+    if (a.archivo === 'solucion.js') return -1;
+    if (b.archivo === 'solucion.js') return 1;
+    return a.archivo.localeCompare(b.archivo);
+  });
+if (soluciones.length === 0) {
+  throw new Error(`<Ejercicio>: no existe soluciones/${ruta}/`);
+}
 ---
 
 <Aside type="tip" title={`Ejercicio: ${titulo}`}>
@@ -29,3 +51,20 @@ const titulo = enunciado.match(/^#\s+(.+)$/m)?.[1] ?? ruta;
   <p>Edita <code>ejercicios/{ruta}/solucion.js</code> y comprueba tu avance con:</p>
   <pre><code>npm test -- ejercicios/{ruta}</code></pre>
 </Aside>
+
+<p class="aviso-solucion">Intenta resolverlo antes de ver la solución.</p>
+<details class="solucion">
+  <summary>Ver solución</summary>
+  {
+    soluciones.map(({ archivo, codigo }) => (
+      <Code code={codigo} lang={archivo.split('.').pop()} title={`soluciones/${ruta}/${archivo}`} />
+    ))
+  }
+</details>
+
+<style>
+  .aviso-solucion {
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+</style>

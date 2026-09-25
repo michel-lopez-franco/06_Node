@@ -7,6 +7,7 @@ Estados: `pendiente` · `en progreso` · `revisado` (solo el profesor marca `rev
 | Tarea                                                 | Estado                            |
 | ----------------------------------------------------- | --------------------------------- |
 | Paso 1: esqueleto, Starlight, CLAUDE.md, PLAN.md y CI | en progreso — listo para revisión |
+| Desplegable "Ver solución" en `<Ejercicio>`           | en progreso — listo para revisión |
 | Paso 2: piloto (módulos 0 y 1 completos)              | pendiente                         |
 | Paso 3: resto del básico + etapas E1–E3               | pendiente                         |
 | Paso 4: nivel intermedio + etapas E4–E9               | pendiente                         |
@@ -60,3 +61,7 @@ Cierre: proyecto final libre con rúbrica — `pendiente`.
   `<Ejemplo>` y `<Ejercicio>`, scripts (`probar`, `probar-soluciones`, `verificar-ejemplos`,
   `nuevo-ejercicio`), ESLint + Prettier, `docker-compose.yml` (Postgres 17), CI de GitHub
   Actions, `CLAUDE.md` y este `PLAN.md`. Listo para revisión.
+- **2026-09-25 — Desplegable "Ver solución".** `<Ejercicio>` muestra, debajo de la tarjeta, el aviso
+  "Intenta resolverlo antes de ver la solución" y un `<details>` cerrado por defecto con todos los
+  archivos de `soluciones/<ruta>/` (`solucion.js` primero). El build falla si falta la solución.
+  Probado con contenido temporal (ya eliminado). Listo para revisión.
