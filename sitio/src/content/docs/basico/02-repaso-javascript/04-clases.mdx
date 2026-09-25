@@ -1,0 +1,107 @@
+---
+title: Clases
+description: Define clases con constructor, campos privados, getters, métodos estáticos y herencia.
+sidebar:
+  order: 4
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Definir una clase con constructor y métodos, y crear objetos con `new`.
+- Proteger datos con campos privados (`#`).
+- Exponer valores calculados con _getters_ y operaciones de la clase con `static`.
+- Extender una clase con `extends` y reutilizar la original con `super`.
+
+## Explicación
+
+### Lo esencial
+
+Una **clase** es un molde para crear objetos que comparten métodos. `new Clase(...)` crea un
+objeto (una **instancia**) y llama a su `constructor`. Dentro de los métodos, `this` es el
+objeto sobre el que se llamó.
+
+### Campos privados, getters y estáticos
+
+- **Campos privados** (`#tareas`): solo los métodos de la clase pueden usarlos. Desde fuera,
+  `objeto.#tareas` es un `SyntaxError` y `console.log(objeto)` no los muestra. Sirven para que
+  nadie se salte tus validaciones modificando los datos a mano.
+- **_Getters_** (`get total()`): un método que se lee como propiedad (`lista.total`, sin
+  paréntesis) y se calcula cada vez.
+- **`static`**: campos y métodos que pertenecen a la clase, no a cada objeto
+  (`Temporizador.desdeLista(...)`).
+
+### Herencia
+
+`class B extends A` crea una clase que tiene todo lo de `A` y agrega o cambia lo que necesite.
+En su constructor hay que llamar a `super(...)` **antes** de usar `this`, y un método puede
+reutilizar el original con `super.metodo()`.
+
+En Node la herencia que más vas a escribir es la de **errores**: `class MiError extends Error`,
+en la siguiente lección. Fuera de eso, prefiere clases sencillas o funciones.
+
+## Ejemplos
+
+Desde `ejemplos/basico/02-repaso-javascript`:
+
+<Ejemplo archivo="basico/02-repaso-javascript/08-clases.js" />
+
+```sh
+node 08-clases.js
+```
+
+```txt
+1. carrera 120
+2. 126 2
+3. Temporizador { nombre: 'carrera' }
+4. true
+```
+
+La línea 3 muestra que el campo privado `#vueltas` no aparece desde fuera.
+
+<Ejemplo archivo="basico/02-repaso-javascript/09-herencia.js" />
+
+```sh
+node 09-herencia.js
+```
+
+```txt
+[x] Leer
+[ ] Entregar práctica (antes del 2026-10-03)
+true true
+```
+
+## Errores comunes
+
+**`TypeError: Class constructor Tarea cannot be invoked without 'new'`.** Llamaste a la clase
+como función: `Tarea('Leer')`. Usa `new Tarea('Leer')`.
+
+**`ReferenceError: Must call super constructor in derived class before accessing 'this' or
+returning from derived constructor`.** En
+una clase con `extends`, usaste `this` antes de `super(...)`. Llama a `super` primero.
+
+**`SyntaxError: Private field '#tareas' must be declared in an enclosing class`.** Usaste un
+campo privado que no declaraste arriba de la clase, o intentaste leerlo desde fuera. Declara
+`#tareas = [];` dentro de la clase.
+
+**`TypeError: lista.total is not a function`.** `total` es un _getter_: se lee sin paréntesis,
+`lista.total`.
+
+**`this` es `undefined` dentro de un método.** Pasaste el método suelto como callback
+(`setTimeout(objeto.metodo, 100)`) y perdió su objeto. Envuélvelo en una función flecha:
+`setTimeout(() => objeto.metodo(), 100)`.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/02-repaso-javascript/06-lista-de-tareas">
+  Esta clase se parece mucho a la que tendrá la primera etapa del proyecto, en el módulo 3.
+  Pista: `find()` busca un elemento en un arreglo y `{ ...tarea }` crea una copia.
+</Ejercicio>
+
+## Para saber más
+
+- [Clases](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Classes) (MDN)
+- [Propiedades privadas](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Classes/Private_properties)
+  (MDN)

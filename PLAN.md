@@ -4,15 +4,15 @@ Estados: `pendiente` · `en progreso` · `revisado` (solo el profesor marca `rev
 
 ## Infraestructura
 
-| Tarea                                                 | Estado                            |
-| ----------------------------------------------------- | --------------------------------- |
-| Paso 1: esqueleto, Starlight, CLAUDE.md, PLAN.md y CI | en progreso — listo para revisión |
-| Desplegable "Ver solución" en `<Ejercicio>`           | en progreso — listo para revisión |
-| Paso 2: piloto (módulos 0 y 1 completos)              | en progreso — listo para revisión |
-| Paso 3: resto del básico + etapas E1–E3               | pendiente                         |
-| Paso 4: nivel intermedio + etapas E4–E9               | pendiente                         |
-| Paso 5: nivel pro + etapas E10–E17                    | pendiente                         |
-| Hosting del sitio y forma de entrega de ejercicios    | pendiente (por decidir)           |
+| Tarea                                                 | Estado                  |
+| ----------------------------------------------------- | ----------------------- |
+| Paso 1: esqueleto, Starlight, CLAUDE.md, PLAN.md y CI | revisado                |
+| Desplegable "Ver solución" en `<Ejercicio>`           | revisado                |
+| Paso 2: piloto (módulos 0 y 1 completos)              | revisado                |
+| Paso 3: resto del básico + etapas E1–E3               | en progreso             |
+| Paso 4: nivel intermedio + etapas E4–E9               | pendiente               |
+| Paso 5: nivel pro + etapas E10–E17                    | pendiente               |
+| Hosting del sitio y forma de entrega de ejercicios    | pendiente (por decidir) |
 
 ## Temario
 
@@ -22,7 +22,7 @@ Estados: `pendiente` · `en progreso` · `revisado` (solo el profesor marca `rev
 | --- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | --------------------------------- |
 | 0   | Preparación                     | Terminal, Node con fnm/nvm, VS Code, git, cómo usar el curso. `npm test` como **caja negra** hasta el módulo 6 (verde = bien, rojo = falta)                       | —                                               | en progreso — listo para revisión |
 | 1   | ¿Qué es Node?                   | V8, libuv, REPL, `node archivo.js`, `process.argv`, `process.env`, códigos de salida                                                                              | —                                               | en progreso — listo para revisión |
-| 2   | Repaso de JavaScript (opcional) | Repaso **corto y opcional**: desestructuración, spread, clases, closures, errores, `structuredClone`. Enfocado en lo que se usa en Node; los alumnos ya vieron JS | —                                               | pendiente                         |
+| 2   | Repaso de JavaScript (opcional) | Repaso **corto y opcional**: desestructuración, spread, clases, closures, errores, `structuredClone`. Enfocado en lo que se usa en Node; los alumnos ya vieron JS | —                                               | en progreso — listo para revisión |
 | 3   | Módulos y npm                   | ESM vs CommonJS, `package.json`, scripts, semver, `npx`, lockfile                                                                                                 | E1: CLI de tareas en memoria (`util.parseArgs`) | pendiente                         |
 | 4   | Asincronía                      | Event loop, callbacks → promesas → `async`/`await`, `Promise.all`, timers, errores asíncronos                                                                     | —                                               | pendiente                         |
 | 5   | Archivos y rutas                | `node:fs/promises`, `node:path`, JSON, `node:url`, `import.meta.dirname`                                                                                          | E2: persistencia en `tareas.json`               | pendiente                         |
@@ -73,3 +73,10 @@ Cierre: proyecto final libre con rúbrica — `pendiente`.
   `codigo-de-salida` con un `dividir.js` ejecutable). Instrucciones independientes del sistema
   operativo con pestañas macOS/Linux/Windows sincronizadas (`syncKey="so"`). El sidebar ahora
   arma un grupo por módulo con el título de su `index.mdx`. Listo para revisión.
+- **2026-09-25 — Módulo 2 (Repaso de JavaScript, opcional).** 5 lecciones cortas
+  (desestructuración/spread/rest con `?.` y `??`, referencias y copias con `structuredClone`,
+  closures, clases, errores con `extends Error`, `cause`, `finally` y `error.code`), 12 ejemplos
+  y 8 ejercicios (`describir-tarea`, `combinar-opciones`, `marcar-completada`,
+  `generador-de-ids`, `una-vez`, `lista-de-tareas`, `validar-tarea`,
+  `leer-configuracion-json`). El `index.mdx` propone resolver los ejercicios primero para decidir
+  si saltarse el módulo. `ListaDeTareas` anticipa la E1. Listo para revisión.

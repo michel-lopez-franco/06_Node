@@ -1,0 +1,99 @@
+---
+title: Closures
+description: Escribe funciones que recuerdan variables de donde se crearon para guardar estado privado y crear funciones configuradas.
+sidebar:
+  order: 3
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Explicar qué es un _closure_ y qué variables recuerda.
+- Escribir una función que devuelve otra función ya configurada.
+- Guardar estado privado dentro de un closure.
+- Comprobar que cada llamada a la función externa crea su propio estado.
+
+## Explicación
+
+### Una función que recuerda
+
+Un **closure** (clausura) es una función que **recuerda las variables del lugar donde se
+creó**, aunque ese lugar ya haya terminado de ejecutarse:
+
+```js
+function crearContador() {
+  let cuenta = 0;
+  return () => ++cuenta; // recuerda `cuenta`
+}
+```
+
+`crearContador()` ya terminó, pero la función que devolvió sigue teniendo acceso a `cuenta`.
+Nadie más puede leer ni cambiar esa variable: es **privada**.
+
+Cada vez que llamas a `crearContador()` se crea una variable `cuenta` nueva. Dos contadores
+nunca se estorban.
+
+### Para qué se usan en Node
+
+- **Fábricas**: funciones que crean funciones configuradas (`crearMultiplicador(2)`,
+  `crearGeneradorDeIds('tarea')`).
+- **Estado privado** sin clases, como un registro de mensajes que nadie puede borrar desde
+  fuera.
+- **_Callbacks_** (funciones que se pasan para que otra las llame después): en el módulo 4
+  verás que casi todo el código asíncrono pasa funciones que usan variables de afuera. Eso ya
+  es un closure.
+
+## Ejemplos
+
+Desde `ejemplos/basico/02-repaso-javascript`:
+
+<Ejemplo archivo="basico/02-repaso-javascript/06-closures.js" />
+
+```sh
+node 06-closures.js
+```
+
+```txt
+A: 1 2 3
+B: 1
+```
+
+<Ejemplo archivo="basico/02-repaso-javascript/07-fabricas.js" />
+
+```sh
+node 07-fabricas.js
+```
+
+```txt
+1. 10 15 [ 2, 4, 6 ]
+2. [ '[tareas] se creó "Leer"', '[tareas] se completó "Leer"' ]
+3. undefined
+```
+
+## Errores comunes
+
+**Todos mis contadores comparten la cuenta.** Declaraste la variable **fuera** de la función
+fábrica, así que solo existe una. Muévela dentro, para que cada llamada cree la suya.
+
+**`TypeError: contador is not a function`.** Guardaste la fábrica en lugar de lo que devuelve:
+`const contador = crearContador` (sin paréntesis). Debe ser `crearContador()`.
+
+**La cuenta se reinicia en cada llamada.** Declaraste la variable **dentro** de la función que
+devuelves; se crea de nuevo cada vez que la llamas. Debe estar en la función de afuera.
+
+**`ReferenceError: cuenta is not defined`.** Intentaste leer la variable del closure desde
+fuera. Es privada a propósito: si hace falta, devuelve una función que la lea.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/02-repaso-javascript/04-generador-de-ids" />
+
+<Ejercicio ruta="basico/02-repaso-javascript/05-una-vez">
+  Pista: necesitas recordar dos cosas entre llamadas: si ya se llamó a `fn` y qué devolvió.
+</Ejercicio>
+
+## Para saber más
+
+- [Closures](https://developer.mozilla.org/es/docs/Web/JavaScript/Guide/Closures) (MDN)

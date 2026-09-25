@@ -1,0 +1,144 @@
+---
+title: Errores
+description: Lanza y atrapa errores, crea tus propios tipos de error, envuelve errores con cause y usa el code de los errores de Node.
+sidebar:
+  order: 5
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Lanzar y atrapar errores con `throw`, `try...catch` y `finally`.
+- Crear una clase de error propia con `extends Error` y distinguirla con `instanceof`.
+- Envolver un error sin perder el original usando `cause`.
+- Decidir qué hacer con un error de Node según su propiedad `code`.
+
+## Explicación
+
+### Lanzar y atrapar
+
+`throw new Error('mensaje')` detiene la función y sube por quienes la llamaron hasta que un
+`try...catch` lo atrapa. Si nadie lo atrapa, el programa termina con código 1, como viste en
+el módulo 1.
+
+Un `Error` tiene al menos `name` (el tipo, como `TypeError`), `message` y `stack` (el
+_stack trace_). **`finally`** se ejecuta siempre, haya error o no, incluso después de un
+`return`: sirve para limpiar (cerrar un archivo, una conexión).
+
+### Errores propios
+
+Para distinguir un tipo de error de otro, crea una clase:
+
+```js
+class ErrorDeValidacion extends Error {}
+```
+
+Así quien atrapa puede preguntar `error instanceof ErrorDeValidacion`, reaccionar a ese caso y
+**volver a lanzar** (`throw error`) los que no sabe manejar. Atrapar todo y seguir como si nada
+esconde errores reales.
+
+Asigna también `this.name` en el constructor, para que en la consola se vea el tipo correcto, y
+agrega las propiedades que ayuden a quien lo atrape (por ejemplo, `campo`).
+
+### Envolver con `cause`
+
+A veces atrapas un error de bajo nivel (`SyntaxError` de `JSON.parse`) y quieres lanzar uno que
+hable en términos de tu programa ("la configuración no es válida"). El segundo argumento de
+`Error` acepta `{ cause: errorOriginal }`: tu mensaje queda claro y el detalle original no se
+pierde.
+
+### `code` en los errores de Node
+
+Los errores que lanza Node traen una propiedad **`code`**, un texto estable como
+`'ERR_INVALID_URL'` o, desde el módulo 5, `'ENOENT'` (el archivo no existe). Compara contra
+`code`, no contra `message`: los mensajes pueden cambiar entre versiones de Node.
+
+## Ejemplos
+
+Desde `ejemplos/basico/02-repaso-javascript`:
+
+<Ejemplo archivo="basico/02-repaso-javascript/10-errores-propios.js" />
+
+```sh
+node 10-errores-propios.js
+```
+
+```txt
+Creada: { titulo: 'Leer', completada: false }
+Dato inválido en "titulo": El título es obligatorio
+Dato inválido en "titulo": El título es obligatorio
+```
+
+<Ejemplo archivo="basico/02-repaso-javascript/11-cause-y-finally.js" />
+
+```sh
+node 11-cause-y-finally.js
+```
+
+```txt
+1. La configuración no es JSON válido
+2. SyntaxError - Expected property name or '}' in JSON at position 2 (line 1 column 3)
+   Abriendo "{"puerto": 3000}"...
+   Cerrando (esto se ejecuta siempre).
+3. { puerto: 3000 }
+   Abriendo "esto no es JSON"...
+   Cerrando (esto se ejecuta siempre).
+4. La configuración no es JSON válido
+```
+
+<Ejemplo archivo="basico/02-repaso-javascript/12-codigos-de-error.js" />
+
+```sh
+node 12-codigos-de-error.js
+```
+
+```txt
+name:    TypeError
+code:    ERR_INVALID_URL
+message: Invalid URL
+→ Pide al usuario una URL que empiece con http:// o https://
+```
+
+## Errores comunes
+
+**Mi error se ve como `Error: ...` y no como `ErrorDeValidacion: ...`.** Faltó
+`this.name = 'ErrorDeValidacion'` en el constructor.
+
+**`error.campo` es `undefined` en el `catch`.** Atrapaste otro error, no el tuyo: por ejemplo,
+un `TypeError` de tu propio código. Revisa `error.name` y `error.message`, y vuelve a lanzar lo
+que no reconozcas.
+
+**El programa sigue como si nada pero con datos incorrectos.** Un `catch` vacío (o que solo
+hace `console.log`) se tragó el error. Atrapa solo lo que sabes manejar y relanza el resto.
+
+**`throw 'algo salió mal'` y luego `error.message` es `undefined`.** Lanzaste un texto, no un
+`Error`. Lanza siempre `new Error('...')`: trae `message` y el _stack trace_.
+
+**`SyntaxError: Unexpected token 'e', "esto no es JSON" is not valid JSON`** o
+**`SyntaxError: Expected property name or '}' in JSON`** al hacer `JSON.parse`. El texto no es
+JSON válido: las propiedades van entre comillas dobles (`{"puerto": 3000}`) y no se permiten
+comas al final.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/02-repaso-javascript/07-validar-tarea">
+  Pista: en el constructor, `super(mensaje)` va primero; después asigna `name` y `campo`.
+</Ejercicio>
+
+<Ejercicio ruta="basico/02-repaso-javascript/08-leer-configuracion-json">
+  Pista: `typeof null` es `'object'` y los arreglos también; `Array.isArray()` te ayuda a
+  distinguirlos.
+</Ejercicio>
+
+## Para saber más
+
+- [Errores en Node.js](https://nodejs.org/docs/latest-v24.x/api/errors.html) (documentación
+  oficial), en especial [`error.code`](https://nodejs.org/docs/latest-v24.x/api/errors.html#errorcode)
+  y los [códigos de Node](https://nodejs.org/docs/latest-v24.x/api/errors.html#nodejs-error-codes)
+- [`Error`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Error)
+  y [`cause`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Error/cause)
+  (MDN)
+- [`try...catch`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Statements/try...catch)
+  (MDN)

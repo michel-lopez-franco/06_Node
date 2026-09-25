@@ -1,0 +1,149 @@
+---
+title: Desestructuración, spread y rest
+description: Saca valores de objetos y arreglos, combina objetos y maneja datos que pueden faltar con ?. y ??.
+sidebar:
+  order: 1
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Extraer propiedades de un objeto y posiciones de un arreglo con desestructuración.
+- Declarar parámetros con valores por defecto desestructurando un objeto.
+- Combinar objetos y arreglos con _spread_ y juntar el resto con _rest_.
+- Leer datos que pueden faltar con `?.` y `??`.
+
+## Explicación
+
+### Desestructuración
+
+La **desestructuración** (_destructuring_) saca valores de un objeto o de un arreglo y los
+guarda en variables en una sola línea:
+
+```js
+const { titulo, completada } = tarea; // por nombre de propiedad
+const [comando, argumento] = lista; // por posición
+```
+
+En los objetos puedes **renombrar** (`{ id: numero }`), entrar a objetos **anidados**
+(`{ autor: { nombre } }`) y dar **valores por defecto** (`{ prioridad = 'normal' }`). El valor
+por defecto se usa cuando la propiedad no existe o vale `undefined`; con `null` no.
+
+Lo verás todo el tiempo en los **parámetros**: `function crear({ titulo, prioridad = 'normal' })`
+dice desde la firma qué propiedades usa la función. Y en el módulo 3 lo verás al importar:
+`import { readFile } from 'node:fs/promises'` se parece mucho, aunque no es lo mismo.
+
+### Spread y rest: los tres puntos
+
+Los tres puntos (`...`) hacen dos cosas opuestas según dónde estén:
+
+- **Spread** (esparcir), del lado derecho o en una llamada: copia los elementos o propiedades
+  en otro lugar. `[...lista, 'nuevo']`, `{ ...porDefecto, puerto: 8080 }`, `Math.max(...numeros)`.
+- **Rest** (el resto), del lado izquierdo o en los parámetros: junta lo que sobra.
+  `const [comando, ...args] = lista`, `function sumar(...valores)`.
+
+Con objetos, si una propiedad se repite **gana la última**. Por eso los valores por defecto van
+primero y los que los reemplazan, después.
+
+### `?.` y `??`
+
+- **`?.`** (encadenamiento opcional, _optional chaining_): `tarea.autor?.nombre` devuelve
+  `undefined` si `autor` no existe, en lugar de lanzar un `TypeError`.
+- **`??`** (_nullish coalescing_), que ya usaste en el módulo 1: da un valor por defecto solo
+  si lo de la izquierda es `undefined` o `null`. `||` lo da con cualquier valor "falso",
+  incluidos `0`, `''` y `false`.
+
+## Ejemplos
+
+Todos se ejecutan desde `ejemplos/basico/02-repaso-javascript`.
+
+<Ejemplo archivo="basico/02-repaso-javascript/01-desestructuracion.js" />
+
+```sh
+node 01-desestructuracion.js
+```
+
+```txt
+1. Entregar práctica false
+2. 7 Ana normal
+3. node hola
+4. Entregar práctica (normal)
+5. Leer capítulo 3 (alta)
+6. 2 1
+```
+
+<Ejemplo archivo="basico/02-repaso-javascript/02-spread-y-rest.js" />
+
+```sh
+node 02-spread-y-rest.js
+```
+
+```txt
+1. [ 'node', 'npm', 'git' ]
+2. { puerto: 8080, host: 'localhost' }
+3. { puerto: undefined, host: 'localhost' }
+4. 9
+5. 10
+6. agregar [ 'Comprar', 'pan' ]
+7. 1 { titulo: 'Leer', completada: false }
+```
+
+Fíjate en la línea 3: `puerto: undefined` sí se copia y tapa el `3000`. Lo resuelves en el
+ejercicio 2.
+
+<Ejemplo archivo="basico/02-repaso-javascript/03-opcionales.js" />
+
+```sh
+node 03-opcionales.js
+```
+
+```txt
+1. Ana
+2. undefined
+3. undefined
+4. undefined
+5. anónimo
+6. 0 3
+```
+
+## Errores comunes
+
+**`TypeError: Cannot read properties of undefined (reading 'nombre')`.** Intentaste leer una
+propiedad de algo que no existe, como `tarea.autor.nombre` cuando la tarea no tiene autor. Usa
+`tarea.autor?.nombre` o revisa antes que exista.
+
+**`TypeError: Cannot destructure property 'titulo' of 'undefined' as it is undefined.`**
+Llamaste sin argumentos a una función que desestructura su parámetro:
+`function crear({ titulo })` y luego `crear()`. Si el objeto es opcional, dale un valor por
+defecto al parámetro completo: `function crear({ titulo } = {})`.
+
+**El valor por defecto no se aplica.** La propiedad vale `null` o `''`, no `undefined`. Los
+valores por defecto de la desestructuración (y `??` con `''`) no los reemplazan.
+
+**`SyntaxError: Rest element must be last element`.** El _rest_ solo puede ir al final:
+`const [...inicio, ultimo] = lista` no es válido.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/02-repaso-javascript/01-describir-tarea">
+  Pista: desestructura el parámetro con valores por defecto y usa `map()` y `join()` para las
+  etiquetas.
+</Ejercicio>
+
+<Ejercicio ruta="basico/02-repaso-javascript/02-combinar-opciones">
+  Pista: `Object.entries(objeto)` devuelve una lista de pares `[nombre, valor]` que puedes
+  recorrer con `for...of` y desestructurar.
+</Ejercicio>
+
+## Para saber más
+
+- [Desestructuración](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment)
+  (MDN)
+- [Sintaxis spread](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Operators/Spread_syntax)
+  y [parámetros rest](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Functions/rest_parameters)
+  (MDN)
+- [Encadenamiento opcional](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Operators/Optional_chaining)
+  y [`??`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Operators/Nullish_coalescing)
+  (MDN)

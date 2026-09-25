@@ -1,0 +1,115 @@
+---
+title: Referencias y copias
+description: Entiende por qué modificar un objeto puede cambiar otro y cópialo sin efectos secundarios con spread o structuredClone.
+sidebar:
+  order: 2
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Explicar por qué asignar un objeto a otra variable no lo copia.
+- Distinguir una copia superficial (spread) de una copia profunda (`structuredClone`).
+- Escribir funciones que devuelven datos nuevos sin modificar los que reciben.
+- Reconocer qué tipos de datos no puede copiar `structuredClone`.
+
+## Explicación
+
+### Valores y referencias
+
+Los números, textos y booleanos se copian al asignarlos. Los **objetos y arreglos no**: la
+variable guarda una **referencia** (una especie de dirección) al objeto. Si haces
+`const b = a`, `a` y `b` apuntan al **mismo** objeto, y un cambio por cualquiera de las dos se
+ve en la otra.
+
+Lo mismo pasa al pasar un objeto a una función: si la función lo modifica, modifica el del que
+la llamó. Y `===` compara referencias, no contenido: dos objetos `{ a: 1 }` creados por
+separado no son `===`.
+
+### Copia superficial y copia profunda
+
+- **Copia superficial** (_shallow copy_): `{ ...objeto }` o `[...arreglo]`. Crea un objeto
+  nuevo, pero lo que esté **anidado** (un arreglo dentro del objeto) se sigue compartiendo.
+- **Copia profunda** (_deep copy_): `structuredClone(objeto)`, una función global de Node y del
+  navegador. Copia todos los niveles; nada queda compartido. Conserva fechas, `Map`, `Set` y
+  referencias circulares.
+
+`structuredClone` no puede copiar funciones, y los objetos creados con una clase pierden su
+clase (quedan como objetos simples).
+
+### No modificar lo que recibes
+
+En Node es común que un mismo objeto (una lista de tareas, la configuración) lo usen varias
+partes del programa. Una función que lo modifica sin avisar provoca errores difíciles de
+rastrear. La costumbre sana es **devolver un objeto nuevo** con los cambios y dejar intacto el
+original. `map`, `filter` y el spread ya trabajan así.
+
+## Ejemplos
+
+Desde `ejemplos/basico/02-repaso-javascript`:
+
+<Ejemplo archivo="basico/02-repaso-javascript/04-referencias.js" />
+
+```sh
+node 04-referencias.js
+```
+
+```txt
+1. Leer capítulo 3
+2. {
+  titulo: 'Leer capítulo 3',
+  etiquetas: [ 'escuela' ],
+  completada: true
+}
+3. Leer capítulo 3
+4. [ 'escuela', 'urgente' ]
+5. false true false
+```
+
+La línea 4 es la trampa de la copia superficial: `copia` es otro objeto, pero su arreglo
+`etiquetas` es el mismo que el del original.
+
+<Ejemplo archivo="basico/02-repaso-javascript/05-structured-clone.js" />
+
+```sh
+node 05-structured-clone.js
+```
+
+```txt
+1. [ 'escuela' ] [ 'escuela', 'urgente' ]
+2. true
+3. DataCloneError - saludar() {} could not be cloned.
+4. { titulo: 'Correr' } false
+```
+
+## Errores comunes
+
+**Cambié la copia y también cambió el original.** Copiaste con spread y modificaste algo
+anidado (`copia.etiquetas.push(...)`). Copia también ese nivel
+(`{ ...tarea, etiquetas: [...tarea.etiquetas, 'nueva'] }`) o usa `structuredClone`.
+
+**`DataCloneError: ... could not be cloned.`** Pasaste a `structuredClone` un objeto que
+tiene funciones. Copia solo los datos, o copia con spread si no hay nada anidado.
+
+**Después de `structuredClone`, `instanceof` da `false` o faltan los métodos.** La copia de
+una instancia de clase es un objeto simple. Crea una instancia nueva con `new` a partir de los
+datos copiados.
+
+**`JSON.parse(JSON.stringify(objeto))` convirtió las fechas en texto.** Es una forma antigua
+de copiar que pierde fechas, `undefined` y `Map`/`Set`. Usa `structuredClone`.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/02-repaso-javascript/03-marcar-completada">
+  Pista: `map()` ya crea un arreglo nuevo; solo falta crear un objeto nuevo para la tarea que
+  cambia.
+</Ejercicio>
+
+## Para saber más
+
+- [`structuredClone()`](https://nodejs.org/docs/latest-v24.x/api/globals.html#structuredclonevalue-options)
+  (documentación oficial de Node)
+- [`structuredClone()`](https://developer.mozilla.org/es/docs/Web/API/Window/structuredClone)
+  y [copia profunda](https://developer.mozilla.org/es/docs/Glossary/Deep_copy) (MDN)

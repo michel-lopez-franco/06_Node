@@ -1,0 +1,39 @@
+---
+title: Repaso de JavaScript (opcional)
+description: Repaso corto de las partes de JavaScript que más se usan en Node, con ejercicios para saber si puedes saltarlo.
+sidebar:
+  order: 0
+  label: Introducción
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Ya sabes JavaScript. Este módulo repasa solo lo que aparece en **todo** el código de Node que
+vas a leer y escribir: sacar datos de objetos, copiarlos sin modificar el original, funciones
+que recuerdan valores, clases y errores. No hay nada de Node en particular; es el JavaScript
+que vas a necesitar desde el módulo 3.
+
+<Aside title="¿Puedo saltármelo?">
+  Haz la prueba: desde la raíz del repositorio corre
+  `npm test -- ejercicios/basico/02-repaso-javascript` y resuelve los ejercicios sin leer las
+  lecciones. Si en un rato los tienes en verde, pasa al módulo 3. Si alguno se te atora, lee
+  solo la lección que le corresponde.
+</Aside>
+
+## Al terminar este módulo podrás
+
+- Sacar valores de objetos y arreglos con desestructuración, y combinarlos con _spread_ y
+  _rest_.
+- Distinguir cuándo dos variables comparten el mismo objeto y copiarlo sin modificar el
+  original.
+- Escribir funciones que guardan estado privado con _closures_.
+- Definir clases con campos privados, _getters_ y herencia.
+- Crear tus propios tipos de error y atraparlos según su tipo.
+
+## Lecciones
+
+1. [Desestructuración, spread y rest](./01-desestructuracion-y-spread/)
+2. [Referencias y copias](./02-referencias-y-copias/)
+3. [Closures](./03-closures/)
+4. [Clases](./04-clases/)
+5. [Errores](./05-errores/)
