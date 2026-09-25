@@ -1,0 +1,144 @@
+---
+title: Opciones con parseArgs
+description: Lee comandos, opciones y banderas de la terminal con util.parseArgs, el analizador que Node trae incluido.
+sidebar:
+  order: 5
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Leer opciones con valor, banderas y argumentos posicionales con `util.parseArgs`.
+- Definir valores por defecto y nombres cortos (`-p`).
+- Atrapar los errores de `parseArgs` y distinguirlos por su `code`.
+- Separar la interpretación de argumentos del resto del programa para poder probarla.
+
+## Explicación
+
+### Lo que ya hiciste a mano
+
+En el módulo 1 leíste `--nombre Ana` y `--nombre=Ana` recorriendo `process.argv` con un ciclo.
+Funcionaba, pero faltaban muchos casos: nombres cortos (`-n Ana`), valores por defecto,
+avisar de opciones mal escritas... Node trae **`parseArgs`**, en `node:util`, que resuelve
+todo eso.
+
+### Cómo se usa
+
+Le describes qué opciones acepta tu programa y te devuelve lo que encontró:
+
+- **`args`:** el arreglo a analizar, normalmente `process.argv.slice(2)`.
+- **`options`:** un objeto con cada opción. Para cada una indicas `type` (`'string'` si lleva
+  valor, `'boolean'` si es bandera) y, si quieres, `short` (una letra) y `default`.
+- **`allowPositionals: true`:** permite argumentos sin guiones (como `agregar` o `Leer`). Sin
+  esto, cualquier argumento suelto es un error.
+
+Devuelve `{ values, positionals }`: `values` tiene las opciones y `positionals` los argumentos
+sueltos, en orden.
+
+Un detalle: `values` es un objeto **sin prototipo** (lo ves en consola como
+`[Object: null prototype]`). Funciona como cualquier objeto para leer sus valores; si lo
+quieres "normal", cópialo con `{ ...values }`.
+
+### Opciones estrictas
+
+Por defecto `parseArgs` es **estricto**: si llega una opción que no declaraste o una opción de
+texto sin valor, lanza un `TypeError` con un `code`:
+
+| `code`                                  | Cuándo                                    |
+| --------------------------------------- | ----------------------------------------- |
+| `ERR_PARSE_ARGS_UNKNOWN_OPTION`         | Una opción que no está en `options`       |
+| `ERR_PARSE_ARGS_INVALID_OPTION_VALUE`   | Una opción `'string'` sin valor           |
+| `ERR_PARSE_ARGS_UNEXPECTED_POSITIONAL`  | Un argumento suelto sin `allowPositionals` |
+
+Es bueno que sea estricto: si el usuario escribe `--pendiente` en lugar de `--pendientes`, es
+mejor avisarle que ignorarlo en silencio. Los mensajes vienen en inglés; como tienen `code`,
+puedes atraparlos y mostrar los tuyos.
+
+Y si necesitas un argumento que empiece con guion (una tarea llamada `-5 kg`), escribe `--`
+antes: todo lo que sigue se toma como posicional.
+
+### Separa la lectura del resto
+
+Igual que en los ejercicios del módulo 1, conviene que la función que interpreta los
+argumentos **reciba** el arreglo en lugar de leer `process.argv` por su cuenta. Así la puedes
+probar con cualquier arreglo, y el archivo principal solo une las piezas. Es lo que hace el
+proyecto a partir de esta lección.
+
+## Ejemplos
+
+Desde `ejemplos/basico/03-modulos-y-npm`:
+
+<Ejemplo archivo="basico/03-modulos-y-npm/07-parseargs.js" />
+
+```sh
+node 07-parseargs.js agregar Leer --prioridad alta --urgente
+```
+
+```txt
+values: [Object: null prototype] { prioridad: 'alta', urgente: true }
+positionals: [ 'agregar', 'Leer' ]
+```
+
+```sh
+node 07-parseargs.js agregar Leer -p baja
+```
+
+```txt
+values: [Object: null prototype] { prioridad: 'baja', urgente: false }
+positionals: [ 'agregar', 'Leer' ]
+```
+
+<Ejemplo archivo="basico/03-modulos-y-npm/08-parseargs-errores.js" />
+
+```sh
+node 08-parseargs-errores.js
+```
+
+```txt
+error    ERR_PARSE_ARGS_UNKNOWN_OPTION
+error    ERR_PARSE_ARGS_INVALID_OPTION_VALUE
+ok       [ 'agregar', 'Leer', '--no-es-opcion' ]
+```
+
+## Errores comunes
+
+**`TypeError [ERR_PARSE_ARGS_UNKNOWN_OPTION]: Unknown option '--color'. To specify a
+positional argument starting with a '-', place it at the end of the command after '--', as in
+'-- "--color"`.** La opción no está declarada en `options`. Agrégala o, si fue un error de
+dedo del usuario, atrápalo y muéstrale un mensaje claro.
+
+**`TypeError [ERR_PARSE_ARGS_INVALID_OPTION_VALUE]: Option '-p, --prioridad <value>' argument
+missing`.** Una opción de tipo `'string'` llegó sin valor, como `--prioridad` al final. Si la
+opción no necesita valor, declárala como `'boolean'`.
+
+**`TypeError [ERR_PARSE_ARGS_UNEXPECTED_POSITIONAL]: Unexpected argument 'agregar'. This
+command does not take positional arguments`.** Olvidaste `allowPositionals: true`.
+
+**`TypeError [ERR_INVALID_ARG_VALUE]: The property 'options.prioridad.short' must be a single
+character. Received 'pr'`.** El nombre corto debe ser una sola letra.
+
+**`TypeError [ERR_INVALID_ARG_TYPE]: The "options.prioridad.default" property must be of type
+string. Received type number (3)`.** El `default` debe ser del mismo tipo que la opción:
+un texto para `'string'` y `true` o `false` para `'boolean'`.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/03-modulos-y-npm/05-interpretar-argumentos">
+  Esta función es una pieza de la etapa 1 del proyecto. Pista: la desestructuración con rest,
+  `const [primero, ...resto] = arreglo`, separa el comando de sus argumentos.
+</Ejercicio>
+
+## Avance del proyecto
+
+Ya tienes todo para la primera etapa: una **CLI de tareas** repartida en módulos, con su
+`package.json`, scripts y opciones leídas con `parseArgs`. Sigue los pasos en
+[Etapa 1: CLI de tareas en memoria](../../../proyecto/etapa-01-cli-en-memoria/).
+
+## Para saber más
+
+- [`util.parseArgs`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilparseargsconfig)
+  (documentación oficial de Node)
+- [Convenciones de argumentos de la terminal](https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html)
+  (manual de GNU, en inglés)

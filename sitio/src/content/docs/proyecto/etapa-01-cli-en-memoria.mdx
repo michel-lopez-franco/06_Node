@@ -1,0 +1,148 @@
+---
+title: 'Etapa 1: CLI de tareas en memoria'
+description: Primera versión del proyecto, una CLI de tareas repartida en módulos, con package.json, scripts y opciones leídas con parseArgs.
+sidebar:
+  order: 1
+  label: 'E1: CLI en memoria'
+---
+
+import { Aside, FileTree, Steps } from '@astrojs/starlight/components';
+import ArchivoDelProyecto from '../../../components/ArchivoDelProyecto.astro';
+
+**Módulo:** [3. Módulos y npm](../../basico/03-modulos-y-npm/) · **Código completo:**
+`proyecto/etapa-01-cli-en-memoria/`
+
+## Qué cambia
+
+Es la primera etapa: partes de una carpeta vacía y terminas con una herramienta de terminal
+para manejar tareas:
+
+```sh
+node src/cli.js listar
+node src/cli.js agregar Comprar pan --prioridad alta
+node src/cli.js completar 2
+```
+
+Las tareas viven **en memoria**: cada ejecución empieza con tres tareas de ejemplo y lo que
+cambies se pierde al terminar. Guardarlas en un archivo es el trabajo de la etapa 2, cuando
+sepas leer y escribir archivos (módulo 5).
+
+## Por qué está hecho así
+
+- **Un módulo por responsabilidad.** La lista de tareas no sabe nada de la terminal, y la
+  terminal no sabe cómo se guardan las tareas. Cuando la etapa 2 agregue un archivo, o la
+  etapa 5 un servidor HTTP, `lista-de-tareas.js` casi no cambia.
+- **Solo `cli.js` toca `process`.** Las demás piezas reciben datos y devuelven resultados.
+  Por eso se pueden probar sin ejecutar el programa.
+- **Códigos de salida del módulo 1:** `0` todo bien, `1` no se pudo hacer lo que pediste (el
+  id no existe) y `2` mal uso (falta el comando, una opción está mal escrita).
+- **`ErrorDeUso` (módulo 2)** distingue un error del usuario al escribir el comando de los
+  errores de la lista, para elegir entre el código 2 y el 1.
+- **Sin dependencias:** `parseArgs` y `import ... with { type: 'json' }` vienen con Node.
+
+## Pasos
+
+<Steps>
+
+1. Crea la carpeta del proyecto, fuera del repositorio del curso, y su `package.json`:
+
+   ```sh
+   mkdir tareas-cli
+   cd tareas-cli
+   npm init -y
+   npm pkg set type=module
+   ```
+
+   Luego edítalo hasta que quede así:
+
+   <ArchivoDelProyecto archivo="etapa-01-cli-en-memoria/package.json" />
+
+   El campo `bin` declara el comando `tareas`; lo usas en el último paso.
+
+2. Crea esta estructura (los archivos pueden estar vacíos por ahora):
+
+   <FileTree>
+   - package.json
+   - src/
+     - cli.js
+     - argumentos.js
+     - comandos.js
+     - formato.js
+     - lista-de-tareas.js
+     - datos-de-ejemplo.js
+   - test/
+   </FileTree>
+
+3. **La lista de tareas.** Parte de tu `ListaDeTareas` del ejercicio 6 del módulo 2 y agrégale
+   la prioridad, `eliminar()` y `todas()`. El método privado `#buscar` evita repetir la
+   búsqueda y el error en `completar` y `eliminar`.
+
+   <ArchivoDelProyecto archivo="etapa-01-cli-en-memoria/src/lista-de-tareas.js" />
+
+4. **Los datos de ejemplo**, para que `listar` y `completar` tengan algo con qué trabajar:
+
+   <ArchivoDelProyecto archivo="etapa-01-cli-en-memoria/src/datos-de-ejemplo.js" />
+
+5. **Los argumentos.** Es tu solución del ejercicio 5 de este módulo, con dos cambios: agrega
+   la bandera `--version` y traduce al español los errores de `parseArgs` usando su `code`.
+
+   <ArchivoDelProyecto archivo="etapa-01-cli-en-memoria/src/argumentos.js" />
+
+6. **El formato**, como en el ejercicio 1 de este módulo, ahora con la prioridad:
+
+   <ArchivoDelProyecto archivo="etapa-01-cli-en-memoria/src/formato.js" />
+
+7. **Los comandos.** `ejecutar` recibe la lista y lo que escribió el usuario, y devuelve
+   `{ codigo, mensaje }` sin imprimir nada:
+
+   <ArchivoDelProyecto archivo="etapa-01-cli-en-memoria/src/comandos.js" />
+
+8. **El punto de entrada** une todo: interpreta los argumentos, ejecuta el comando, imprime en
+   la salida que corresponde y pone el código de salida.
+
+   <ArchivoDelProyecto archivo="etapa-01-cli-en-memoria/src/cli.js" />
+
+   La primera línea, `#!/usr/bin/env node` (_shebang_), le dice al sistema que ejecute el
+   archivo con Node cuando lo corras como comando.
+
+9. Pruébalo:
+
+   ```sh
+   node src/cli.js ayuda
+   node src/cli.js listar --pendientes
+   node src/cli.js agregar Comprar pan -p alta
+   node src/cli.js completar 9      # termina con código 1
+   node src/cli.js listar --color   # termina con código 2
+   npm start -- listar
+   ```
+
+10. **Opcional:** instala el comando `tareas` en tu sistema con `npm link` (desde la carpeta
+    del proyecto). Ahora `tareas listar` funciona desde cualquier carpeta. Para quitarlo:
+    `npm unlink -g tareas-cli`.
+
+</Steps>
+
+Salida esperada de `node src/cli.js listar`:
+
+```txt
+[x] #1 Instalar Node 24 (media)
+[ ] #2 Leer el módulo 3 (alta)
+[ ] #3 Probar npm link (baja)
+```
+
+## Tests
+
+La etapa trae tests en `test/`. Cópialos a tu proyecto y córrelos con:
+
+```sh
+npm test
+```
+
+Todavía los usas como **caja negra**: si todo sale en verde, tu CLI se comporta como la de
+referencia. En la etapa 3 (módulo 6) aprendes a escribirlos.
+
+<Aside title="Si te atoras">
+  Compara tu carpeta con la de referencia: `diff -r tareas-cli
+  ruta/al/curso/proyecto/etapa-01-cli-en-memoria`. O empieza la etapa 2 directamente desde esa
+  carpeta.
+</Aside>

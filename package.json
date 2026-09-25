@@ -15,6 +15,7 @@
     "preview": "npm run preview -w sitio",
     "test": "node scripts/probar.js",
     "test:soluciones": "node scripts/probar-soluciones.js",
+    "test:proyecto": "node scripts/probar-proyecto.js",
     "verificar": "node scripts/verificar-ejemplos.js",
     "nuevo-ejercicio": "node scripts/nuevo-ejercicio.js",
     "lint": "eslint .",

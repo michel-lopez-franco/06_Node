@@ -1,0 +1,169 @@
+---
+title: package.json y scripts
+description: Crea el package.json de un proyecto, entiende sus campos principales y automatiza comandos con scripts.
+sidebar:
+  order: 3
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+import Ejemplo from '../../../../components/Ejemplo.astro';
+
+## Objetivos
+
+- Crear un `package.json` con `npm init` y ajustarlo para usar ESM.
+- Explicar para qué sirven `name`, `version`, `type`, `scripts`, `bin` y `engines`.
+- Definir scripts y ejecutarlos con `npm run`, `npm start`, `npm test` y `node --run`.
+- Pasarle argumentos a un script con `--`.
+
+## Explicación
+
+### npm y el `package.json`
+
+**npm** (_Node Package Manager_) viene instalado con Node. Sirve para dos cosas: manejar las
+**dependencias** de tu proyecto (lección siguiente) y ejecutar sus **scripts**. Todo lo que
+npm sabe de tu proyecto está en un archivo en la raíz: el **`package.json`**.
+
+Una carpeta con un `package.json` es un **paquete**. Para crearlo:
+
+```sh
+npm init -y
+```
+
+`-y` acepta todas las respuestas por defecto (sin él, npm te hace preguntas).
+
+<Aside type="caution" title="Cambia el type">
+  `npm init` crea el archivo con `"type": "commonjs"`. En este curso usamos ESM, así que
+  cámbialo a `"type": "module"` o ejecuta `npm pkg set type=module`.
+</Aside>
+
+### Los campos principales
+
+| Campo          | Para qué sirve                                                                                |
+| -------------- | --------------------------------------------------------------------------------------------- |
+| `name`         | Nombre del paquete: minúsculas, sin espacios (`tareas-cli`).                                  |
+| `version`      | Versión actual, con el formato `MAYOR.MENOR.PARCHE` (lección siguiente).                      |
+| `description`  | Una línea sobre qué hace.                                                                     |
+| `type`         | `"module"` para que los `.js` sean ESM.                                                       |
+| `scripts`      | Comandos con nombre para el proyecto.                                                         |
+| `bin`          | Comandos de terminal que instala el paquete (`"tareas": "./src/cli.js"`).                     |
+| `engines`      | Versiones de Node con las que funciona (`">=24"`).                                            |
+| `private`      | `true` impide publicarlo en npm por accidente.                                                |
+| `dependencies` | Paquetes que necesita para funcionar (lección siguiente).                                     |
+| `main` / `exports` | Qué archivo recibe quien importe tu paquete. Solo importa si publicas una librería.       |
+
+Es un archivo JSON: comillas dobles, sin comas al final y sin comentarios.
+
+### Scripts
+
+La sección `scripts` le pone nombre a comandos que usas seguido:
+
+```json
+"scripts": { "start": "node 01-importar.js", "info": "node 06-leer-package-json.js" }
+```
+
+- `npm run info` ejecuta el script `info`. `npm run`, solo, lista los scripts disponibles.
+- `start` y `test` tienen atajo: `npm start` y `npm test`.
+- Los scripts se ejecutan **desde la carpeta del `package.json`**, aunque estés en una
+  subcarpeta.
+- Para pasarle argumentos al programa, sepáralos con `--`: `npm run opciones -- -p alta`.
+  Todo lo que va después de `--` es para el script, no para npm.
+- `node --run info` hace lo mismo que `npm run info`, pero más rápido, porque no carga npm.
+  Solo que no ejecuta los scripts `pre` y `post` (como `pretest`), que npm corre antes y
+  después del script del mismo nombre.
+
+Los scripts son la documentación ejecutable del proyecto: quien lo clone sabe que puede correr
+`npm test` y `npm start` sin leer nada más. Es justo lo que has hecho en la raíz del curso
+desde el módulo 0.
+
+## Ejemplos
+
+La carpeta `ejemplos/basico/03-modulos-y-npm` tiene su propio `package.json`:
+
+<Ejemplo archivo="basico/03-modulos-y-npm/package.json" />
+
+Desde esa carpeta:
+
+```sh
+npm run
+```
+
+```txt
+Lifecycle scripts included in ejemplos-modulo-3@1.0.0:
+  start
+    node 01-importar.js
+available via `npm run`:
+  info
+    node 06-leer-package-json.js
+  opciones
+    node 07-parseargs.js
+```
+
+```sh
+npm run info
+```
+
+```txt
+> ejemplos-modulo-3@1.0.0 info
+> node 06-leer-package-json.js
+
+ejemplos-modulo-3 v1.0.0
+Scripts disponibles: start, info, opciones
+```
+
+Las dos líneas que empiezan con `>` las escribe npm para decirte qué script ejecuta.
+`node --run info` muestra lo mismo, sin esas dos líneas.
+
+## Errores comunes
+
+**`npm error Missing script: "inicio"`.** No hay un script con ese nombre. Corre `npm run`
+para ver la lista y revisa cómo está escrito.
+
+**`npm error enoent Could not read package.json: Error: ENOENT: no such file or directory`.**
+No hay `package.json` en esta carpeta ni en ninguna de arriba. Revisa con `pwd` dónde estás y
+entra a la carpeta del proyecto, o créalo con `npm init -y`.
+
+**`npm error code EJSONPARSE` y `npm error JSON.parse Invalid package.json: JSONParseError:
+Expected double-quoted property name in JSON at position 31`.** El `package.json` tiene un
+error de sintaxis: casi siempre una coma de más al final de una lista,
+comillas simples o un comentario. JSON no permite ninguno de los tres.
+
+**El script no recibe tus opciones: `npm run opciones -p alta` no le pasa `-p`.** Sin `--`, npm
+cree que las opciones son para él. Escribe `npm run opciones -- -p alta`.
+
+## Ejercicios
+
+Esta lección no tiene tests: practica creando tu propio paquete fuera del repositorio del
+curso.
+
+<Steps>
+
+1. Crea una carpeta de práctica y entra en ella:
+
+   ```sh
+   mkdir hola-npm
+   cd hola-npm
+   npm init -y
+   npm pkg set type=module
+   ```
+
+2. Crea un `index.js` que imprima `process.argv.slice(2)`.
+
+3. Agrega a `package.json` el script `"start": "node index.js"` y otro `"saludar"` que lo
+   ejecute con el argumento `Ana`.
+
+4. Prueba `npm start`, `npm run saludar`, `npm start -- hola adiós` y `node --run saludar`.
+   ¿Qué cambia en la salida entre `npm run` y `node --run`?
+
+</Steps>
+
+Conserva la carpeta: la usas en la lección siguiente para instalar tu primera dependencia.
+
+## Para saber más
+
+- [`package.json`](https://docs.npmjs.com/cli/configuring-npm/package-json) (documentación de
+  npm)
+- [`npm run`](https://docs.npmjs.com/cli/commands/npm-run) (documentación de npm)
+- [`node --run`](https://nodejs.org/docs/latest-v24.x/api/cli.html#--run) (documentación
+  oficial de Node)
+- [Campos de `package.json` que usa Node](https://nodejs.org/docs/latest-v24.x/api/packages.html#nodejs-packagejson-field-definitions)
+  (documentación oficial de Node)

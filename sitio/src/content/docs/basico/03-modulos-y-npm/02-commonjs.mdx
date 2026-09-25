@@ -1,0 +1,145 @@
+---
+title: CommonJS
+description: Reconoce el sistema de módulos original de Node, cómo convive con ESM y cómo convertirlo.
+sidebar:
+  order: 2
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Reconocer un módulo CommonJS por `require` y `module.exports`.
+- Explicar cómo decide Node si un archivo es ESM o CommonJS (`"type"`, `.mjs`, `.cjs`).
+- Importar un módulo CommonJS desde ESM y viceversa.
+- Convertir un módulo CommonJS a ESM.
+
+## Explicación
+
+### Antes de ESM
+
+Node nació en 2009, años antes de que JavaScript tuviera `import` y `export`. Para dividir el
+código en archivos inventó su propio sistema, **CommonJS** (CJS):
+
+```js
+const { saludar } = require('./saludos.cjs'); // importar
+module.exports = { saludar, despedir }; // exportar
+```
+
+Hoy todo código nuevo se escribe en ESM, pero vas a encontrar CommonJS en tutoriales viejos,
+en respuestas de internet y dentro de muchos paquetes de npm. Tienes que saber leerlo.
+
+### Diferencias que importan
+
+| | ESM | CommonJS |
+| --- | --- | --- |
+| Importar | `import { x } from './a.js'` | `const { x } = require('./a.js')` |
+| Exportar | `export function x() {}` | `module.exports = { x }` |
+| Cuándo se cargan | Antes de ejecutar el archivo | Cuando se ejecuta la línea del `require` |
+| Extensión en la ruta | Obligatoria | Opcional |
+| Ruta del archivo actual | `import.meta.filename` y `import.meta.dirname` (módulo 5) | `__filename` y `__dirname` |
+
+`require()` es una función normal: puedes llamarla dentro de un `if` o de una función. `import`
+no; va arriba del archivo, y eso permite que Node revise todas las importaciones antes de
+ejecutar nada.
+
+### ¿Cómo sabe Node cuál es cuál?
+
+1. Un archivo `.mjs` siempre es ESM y uno `.cjs` siempre es CommonJS.
+2. Para los `.js`, Node busca el `package.json` más cercano (en la misma carpeta o hacia
+   arriba) y lee su campo `"type"`: `"module"` significa ESM; `"commonjs"`, CommonJS.
+3. Si no hay `"type"`, Node intenta detectarlo por la sintaxis del archivo, pero no te
+   confíes: pon siempre `"type": "module"`.
+
+El `package.json` de la raíz del repositorio del curso tiene `"type": "module"`. Por eso
+todos los `.js` son ESM, y los ejemplos de esta lección usan `.cjs` para ser CommonJS.
+
+### Convivencia
+
+- **ESM puede importar CommonJS:** `module.exports` llega como la exportación por defecto y,
+  cuando Node puede detectarlas, sus propiedades también como exportaciones con nombre.
+- **CommonJS puede hacer `require()` de ESM** (desde Node 22.12), siempre que ese módulo no
+  use `await` en el nivel superior, que verás en el módulo 4.
+
+### Convertir de CommonJS a ESM
+
+1. Cambia cada `const { a } = require('x')` por `import { a } from 'x'`, arriba del archivo.
+2. Agrega la extensión a las rutas propias: `require('./util')` pasa a `from './util.js'`.
+3. Cambia `module.exports = { a, b }` por `export` delante de cada declaración (o
+   `export { a, b }` al final).
+4. Cambia `__dirname` por `import.meta.dirname`.
+
+## Ejemplos
+
+Desde `ejemplos/basico/03-modulos-y-npm`:
+
+<Ejemplo archivo="basico/03-modulos-y-npm/modulos/saludos.cjs" />
+
+<Ejemplo archivo="basico/03-modulos-y-npm/03-commonjs.cjs" />
+
+```sh
+node 03-commonjs.cjs
+```
+
+```txt
+1. ¡Hola, Ana!
+2. Adiós, Luis.
+3. string
+4. string function object
+```
+
+<Ejemplo archivo="basico/03-modulos-y-npm/04-esm-importa-cjs.js" />
+
+```sh
+node 04-esm-importa-cjs.js
+```
+
+```txt
+1. ¡Hola, Ana!
+2. Adiós, Ana.
+```
+
+<Ejemplo archivo="basico/03-modulos-y-npm/05-cjs-requiere-esm.cjs" />
+
+```sh
+node 05-cjs-requiere-esm.cjs
+```
+
+```txt
+1. 5
+2. 3.14
+```
+
+## Errores comunes
+
+**`ReferenceError: require is not defined in ES module scope, you can use import instead`.**
+Usaste `require` en un archivo ESM (un `.js` con `"type": "module"`). Cámbialo por `import`.
+
+**`ReferenceError: module is not defined in ES module scope`.** Lo mismo con
+`module.exports`: en ESM se usa `export`.
+
+**`SyntaxError: Cannot use import statement outside a module`.** Es el caso contrario: usaste
+`import` en un archivo que Node trata como CommonJS. Pasa mucho después de `npm init`, que
+crea el `package.json` con `"type": "commonjs"`. Cámbialo a `"type": "module"`.
+
+**`ReferenceError: __dirname is not defined in ES module scope`.** En ESM usa
+`import.meta.dirname`, que verás a fondo en el módulo 5.
+
+**Convertiste `module.exports = { a, b }` en `export default { a, b }` y ahora
+`import { a }` falla con `does not provide an export named 'a'`.** `export default { a, b }`
+exporta **un objeto** por defecto, no dos exportaciones con nombre. Usa `export` en cada
+declaración.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/03-modulos-y-npm/03-de-commonjs-a-esm" />
+
+## Para saber más
+
+- [Módulos CommonJS](https://nodejs.org/docs/latest-v24.x/api/modules.html) (documentación
+  oficial de Node)
+- [Cómo determina Node el sistema de módulos](https://nodejs.org/docs/latest-v24.x/api/packages.html#determining-module-system)
+  (documentación oficial de Node)
+- [Cargar ESM con `require()`](https://nodejs.org/docs/latest-v24.x/api/modules.html#loading-ecmascript-modules-using-require)
+  (documentación oficial de Node)

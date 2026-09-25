@@ -11,7 +11,7 @@ import { buscar, gris, RAIZ, rojo, verde } from './comun.js';
 
 const LIMITE_MS = 10_000;
 
-const ejemplos = await buscar('ejemplos/**/*.{js,mjs}');
+const ejemplos = await buscar('ejemplos/**/*.{js,mjs,cjs}');
 if (ejemplos.length === 0) {
   console.log('No hay ejemplos todavía.');
   process.exit(0);

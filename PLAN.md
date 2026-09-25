@@ -23,7 +23,7 @@ Estados: `pendiente` · `en progreso` · `revisado` (solo el profesor marca `rev
 | 0   | Preparación                     | Terminal, Node con fnm/nvm, VS Code, git, cómo usar el curso. `npm test` como **caja negra** hasta el módulo 6 (verde = bien, rojo = falta)                       | —                                               | en progreso — listo para revisión |
 | 1   | ¿Qué es Node?                   | V8, libuv, REPL, `node archivo.js`, `process.argv`, `process.env`, códigos de salida                                                                              | —                                               | en progreso — listo para revisión |
 | 2   | Repaso de JavaScript (opcional) | Repaso **corto y opcional**: desestructuración, spread, clases, closures, errores, `structuredClone`. Enfocado en lo que se usa en Node; los alumnos ya vieron JS | —                                               | en progreso — listo para revisión |
-| 3   | Módulos y npm                   | ESM vs CommonJS, `package.json`, scripts, semver, `npx`, lockfile                                                                                                 | E1: CLI de tareas en memoria (`util.parseArgs`) | pendiente                         |
+| 3   | Módulos y npm                   | ESM vs CommonJS, `package.json`, scripts, semver, `npx`, lockfile                                                                                                 | E1: CLI de tareas en memoria (`util.parseArgs`) | en progreso — listo para revisión |
 | 4   | Asincronía                      | Event loop, callbacks → promesas → `async`/`await`, `Promise.all`, timers, errores asíncronos                                                                     | —                                               | pendiente                         |
 | 5   | Archivos y rutas                | `node:fs/promises`, `node:path`, JSON, `node:url`, `import.meta.dirname`                                                                                          | E2: persistencia en `tareas.json`               | pendiente                         |
 | 6   | Pruebas con `node:test`         | `test`, `describe`, `assert`, `--watch`, TDD básico. Aquí se "abre la caja negra" de `npm test`                                                                   | E3: suite de tests de la CLI                    | pendiente                         |
@@ -80,3 +80,16 @@ Cierre: proyecto final libre con rúbrica — `pendiente`.
   `generador-de-ids`, `una-vez`, `lista-de-tareas`, `validar-tarea`,
   `leer-configuracion-json`). El `index.mdx` propone resolver los ejercicios primero para decidir
   si saltarse el módulo. `ListaDeTareas` anticipa la E1. Listo para revisión.
+- **2026-09-25 — Módulo 3 (Módulos y npm) y etapa E1.** 5 lecciones (módulos ES con enlaces vivos,
+  reexportaciones e importación de JSON; CommonJS y su convivencia con ESM; `package.json` y
+  scripts con `npm run`/`node --run`; dependencias, semver, lockfile y `npx`; `util.parseArgs`),
+  12 ejemplos (más 4 módulos auxiliares y un `package.json` propio en la carpeta del módulo) y 5
+  ejercicios (`exportar-formato`, `reunir-modulos`, `de-commonjs-a-esm`, `rango-semver`,
+  `interpretar-argumentos`). En los ejercicios 1–3 el alumno escribe los `export`, así que con
+  el stub los tests fallan al importar (el README lo avisa). La práctica de `npm install` se hace
+  en una carpeta propia fuera del repo, para mantener el nivel básico sin dependencias.
+  Etapa E1 en `proyecto/etapa-01-cli-en-memoria/` (comandos agregar/listar/completar/eliminar,
+  códigos de salida 0/1/2, `bin` para `npm link`, 24 tests) y su página en el sitio.
+  Infraestructura: `verificar` y `<Ejemplo>` aceptan `.cjs`; nuevo componente
+  `<ArchivoDelProyecto>`; nuevo `npm run test:proyecto` (también en CI); CLAUDE.md actualizado.
+  Listo para revisión.

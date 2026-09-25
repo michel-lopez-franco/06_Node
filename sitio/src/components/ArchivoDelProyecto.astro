@@ -1,0 +1,29 @@
+---
+// Muestra un archivo real de proyecto/ con resaltado de sintaxis, igual que <Ejemplo>.
+// Falla el build si el archivo no existe.
+//
+//   <ArchivoDelProyecto archivo="etapa-01-cli-en-memoria/src/cli.js" />
+import { Code } from '@astrojs/starlight/components';
+
+interface Props {
+  /** Ruta relativa a proyecto/ */
+  archivo: string;
+  /** Título de la tarjeta de código; por defecto, la ruta del archivo. */
+  titulo?: string;
+  /** Lenguaje para el resaltado; por defecto, la extensión del archivo. */
+  lang?: string;
+}
+
+const archivos = import.meta.glob<string>(
+  ['../../../proyecto/**/*.{js,mjs,cjs,ts,json,sql,md}', '!**/node_modules/**'],
+  { query: '?raw', import: 'default', eager: true },
+);
+
+const { archivo, titulo, lang } = Astro.props;
+const codigo = archivos[`../../../proyecto/${archivo}`];
+if (codigo === undefined) {
+  throw new Error(`<ArchivoDelProyecto>: no existe proyecto/${archivo}`);
+}
+---
+
+<Code code={codigo} lang={lang ?? archivo.split('.').pop()} title={titulo ?? `proyecto/${archivo}`} />

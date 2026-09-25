@@ -21,6 +21,7 @@ npm run dev                 # sitio en http://localhost:4321
 npm run build               # build estático del sitio
 npm test [-- ruta]          # tests de ejercicios/ (lo que corre el alumno; fallan con los stubs)
 npm run test:soluciones     # soluciones pasan los tests y stubs los fallan (CI)
+npm run test:proyecto       # npm test de cada proyecto/etapa-NN-*/ (CI)
 npm run verificar           # ejecuta todos los ejemplos/ y exige código 0
 npm run nuevo-ejercicio -- basico/04-asincronia/01-nombre   # crea ejercicio + solución espejo
 npm run lint                # ESLint
@@ -29,7 +30,7 @@ docker compose up -d        # PostgreSQL 17 (módulos 11+). Usuario/clave/BD: cu
 ```
 
 **Antes de dar una tarea por terminada:** `npm run lint`, `npm run verificar`,
-`npm run test:soluciones` y `npm run build` deben pasar.
+`npm run test:soluciones`, `npm run test:proyecto` y `npm run build` deben pasar.
 
 ## Mapa del repositorio
 
@@ -84,7 +85,9 @@ Componentes propios (`sitio/src/components/`):
   comando de prueba y, debajo, un bloque desplegable **"Ver solución"** (cerrado por defecto) que
   muestra el archivo real de `soluciones/`, precedido del aviso "Intenta resolverlo antes de ver
   la solución".
-  Ambos rompen el build si la ruta no existe.
+- `<ArchivoDelProyecto archivo="etapa-01-cli-en-memoria/src/cli.js" />` — muestra un archivo real
+  de `proyecto/` (para las páginas de cada etapa).
+  Los tres rompen el build si la ruta no existe.
 
 Enlaces internos **relativos** (`../temario/`), para que funcionen si luego se configura `base`.
 
@@ -92,7 +95,8 @@ Enlaces internos **relativos** (`../temario/`), para que funcionen si luego se c
 
 - **Nunca pegues código a mano en una lección** si es más que un fragmento de 1–3 líneas: va en
   `ejemplos/` y se muestra con `<Ejemplo>`.
-- Cada ejemplo corre con `node archivo.js` desde su carpeta y termina con código 0.
+- Cada ejemplo corre con `node archivo.js` desde su carpeta y termina con código 0. `verificar`
+  ejecuta todos los `.js`, `.mjs` y `.cjs` (también los módulos auxiliares en subcarpetas).
 - Comentarios especiales: `// @verificar omitir` (servidores que no terminan),
   `// @verificar args: a b c`, `// @verificar falla` (ejemplos que muestran un error a propósito).
 

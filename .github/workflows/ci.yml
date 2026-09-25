@@ -23,5 +23,7 @@ jobs:
         run: npm run verificar
       - name: Ejercicios vs. soluciones
         run: npm run test:soluciones
+      - name: Tests del proyecto
+        run: npm run test:proyecto
       - name: Build del sitio
         run: npm run build

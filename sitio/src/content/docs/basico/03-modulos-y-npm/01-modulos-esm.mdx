@@ -1,0 +1,199 @@
+---
+title: Módulos ES
+description: Divide tu programa en archivos con export e import, y entiende cómo Node los carga.
+sidebar:
+  order: 1
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Exportar funciones, clases y valores con exportaciones con nombre y por defecto.
+- Importar desde tus archivos, desde módulos de Node (`node:`) y desde JSON.
+- Explicar por qué un módulo se evalúa una sola vez y qué es un enlace vivo.
+- Reunir varios módulos en uno con `export ... from`.
+- Resolver los errores `ERR_MODULE_NOT_FOUND` y `does not provide an export named`.
+
+## Explicación
+
+### Un archivo, un módulo
+
+En Node, cada archivo `.js` es un **módulo**: tiene su propio alcance. Una variable o función
+que declaras en un archivo **no** existe en los demás, a menos que ese archivo la **exporte**
+y el otro la **importe**. Así cada archivo decide qué es público y qué es un detalle interno.
+
+El sistema que usa este curso se llama **ESM** (_ECMAScript Modules_, los módulos estándar de
+JavaScript): es el mismo `import`/`export` que usa el navegador. Es el que viste desde el
+módulo 0 en `export function` de cada `solucion.js`: ese `export` es lo que deja que el
+archivo de tests use tu función.
+
+### Exportar
+
+Hay dos tipos de exportación:
+
+- **Con nombre:** `export` delante de una declaración (`export function sumar`,
+  `export const PI_APROX`). Puede haber todas las que quieras. Quien importe debe usar el
+  nombre exacto, entre llaves.
+- **Por defecto:** `export default` delante de una función, clase o valor. Solo una por
+  módulo, y quien la importe le pone el nombre que quiera, sin llaves.
+
+Prefiere las exportaciones con nombre: el editor las autocompleta, los errores de dedo se
+detectan al arrancar y todos las llaman igual. La exportación por defecto es útil cuando el
+módulo ofrece una sola cosa principal.
+
+### Importar
+
+```js
+import areaDeCirculo, { sumar, PI_APROX } from './modulos/matematicas.js';
+```
+
+- Las rutas a tus archivos empiezan con `./` o `../` y **llevan la extensión** `.js`. Node no
+  la adivina.
+- Los módulos de Node se importan con el prefijo `node:` (`node:os`, `node:util`). Así queda
+  claro que vienen con Node y no de un paquete instalado.
+- Un nombre suelto, sin `./` ni `node:` (`'picocolors'`), es un **paquete** instalado con npm;
+  lo ves en la lección 4.
+- Los `import` van hasta arriba del archivo. Node los lee **antes** de ejecutar cualquier
+  línea: si pides algo que no existe, el programa ni siquiera arranca.
+
+También puedes renombrar al importar (`{ multiplicar as por }`) o juntar todas las
+exportaciones en un objeto (`import * as matematicas`).
+
+### Un módulo se evalúa una sola vez
+
+La primera vez que alguien importa un módulo, Node lo ejecuta y guarda el resultado. Las
+siguientes veces entrega **el mismo** módulo, sin volver a ejecutarlo. Por eso, si dos
+archivos importan un contador, los dos comparten el mismo estado.
+
+Además, lo que importas es un **enlace vivo** (_live binding_): si el módulo original cambia
+el valor de una variable exportada, quien la importó ve el valor nuevo. Pero no puede
+asignarle otro: desde fuera es de solo lectura.
+
+### Reunir módulos
+
+Cuando varias piezas se usan juntas, es común tener un archivo que las reexporta para que
+quien las use haga un solo `import`:
+
+```js
+export { normalizarTitulo } from './titulos.js';
+```
+
+Eso pasa la exportación tal cual, sin copiarla. Lo practicas en el ejercicio 2.
+
+### Importar JSON
+
+Un archivo `.json` se puede importar directamente, pero hay que decirle a Node que es JSON con
+`with { type: 'json' }` (un **atributo de importación**). Es una medida de seguridad: evita que
+un archivo que esperabas que fuera datos se ejecute como código.
+
+## Ejemplos
+
+Desde `ejemplos/basico/03-modulos-y-npm`:
+
+<Ejemplo archivo="basico/03-modulos-y-npm/modulos/matematicas.js" />
+
+<Ejemplo archivo="basico/03-modulos-y-npm/01-importar.js" />
+
+```sh
+node 01-importar.js
+```
+
+```txt
+1. 5 3.14
+2. 12.56
+3. 32
+4. [ 'PI_APROX', 'default', 'multiplicar', 'sumar' ]
+5. ¿redondear es privada? true
+6. sistema: darwin
+```
+
+La última línea dice `darwin` en macOS, `linux` en Linux y `win32` en Windows.
+
+Ahora, un módulo compartido por dos archivos:
+
+<Ejemplo archivo="basico/03-modulos-y-npm/modulos/contador.js" />
+
+<Ejemplo archivo="basico/03-modulos-y-npm/modulos/pagina.js" />
+
+<Ejemplo archivo="basico/03-modulos-y-npm/02-un-solo-modulo.js" />
+
+```sh
+node 02-un-solo-modulo.js
+```
+
+```txt
+(evaluando contador.js)
+1. visitas al inicio: 0
+Página: inicio
+Página: contacto
+2. visitas al final: 3
+```
+
+`contador.js` se evaluó una vez aunque lo importan dos archivos, y las tres visitas (una
+directa y dos desde `pagina.js`) se sumaron en el mismo contador.
+
+Por último, importar un JSON:
+
+<Ejemplo archivo="basico/03-modulos-y-npm/06-leer-package-json.js" />
+
+```sh
+node 06-leer-package-json.js
+```
+
+```txt
+ejemplos-modulo-3 v1.0.0
+Scripts disponibles: start, info, opciones
+```
+
+## Errores comunes
+
+**`Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/…/modulos/matematicas' imported from
+/…/01-importar.js`.** Te faltó la extensión: escribe `'./modulos/matematicas.js'`. Node
+incluso sugiere la corrección en la línea `Did you mean to import "./modulos/matematicas.js"?`.
+Si la ruta sí trae extensión, revisa que la carpeta y el nombre estén bien escritos.
+
+**`Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'modulos' imported from …`.** Olvidaste
+el `./`. Sin él, Node busca un paquete instalado llamado `modulos`.
+
+**`SyntaxError: The requested module './solucion.js' does not provide an export named
+'sumar'`.** El otro archivo no exporta ese nombre. Revisa que tenga `export`, que el nombre
+sea idéntico (mayúsculas incluidas) y que no estés usando llaves para algo que se exportó con
+`export default`.
+
+**`TypeError [ERR_IMPORT_ATTRIBUTE_MISSING]: Module "file:///…/package.json" needs an import
+attribute of "type: json"`.** Al importar un JSON falta `with { type: 'json' }`.
+
+**`TypeError: Assignment to constant variable.`** Intentaste asignar un valor a algo
+importado. Las importaciones son de solo lectura; si necesitas cambiarlo, exporta una función
+que lo haga (como `registrarVisita()`).
+
+<Aside type="caution" title="Importaciones circulares">
+  Si `a.js` importa `b.js` y `b.js` importa `a.js`, alguno de los dos puede usar algo que
+  todavía no se evalúa y recibir un `ReferenceError`. Si te pasa, saca lo que comparten a un
+  tercer archivo que ambos importen.
+</Aside>
+
+## Ejercicios
+
+<Ejercicio ruta="basico/03-modulos-y-npm/01-exportar-formato">
+  Aquí, a diferencia de los módulos anteriores, **tú** escribes los `export`. Mientras falten,
+  todos los tests fallan con un `SyntaxError`: es normal.
+</Ejercicio>
+
+<Ejercicio ruta="basico/03-modulos-y-npm/02-reunir-modulos">
+  Pista: `export { ... } from` reexporta, pero no crea una variable que puedas usar dentro del
+  archivo. Para usarla también necesitas un `import`.
+</Ejercicio>
+
+## Para saber más
+
+- [Módulos ECMAScript](https://nodejs.org/docs/latest-v24.x/api/esm.html) (documentación
+  oficial de Node)
+- [Módulos de JavaScript](https://developer.mozilla.org/es/docs/Web/JavaScript/Guide/Modules)
+  (MDN)
+- [`import`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Statements/import)
+  y [`export`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Statements/export)
+  (MDN)

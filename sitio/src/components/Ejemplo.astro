@@ -14,7 +14,7 @@ interface Props {
   lang?: string;
 }
 
-const archivos = import.meta.glob<string>('../../../ejemplos/**/*.{js,mjs,ts,json,sql,csv,txt,env}', {
+const archivos = import.meta.glob<string>('../../../ejemplos/**/*.{js,mjs,cjs,ts,json,sql,csv,txt,env}', {
   query: '?raw',
   import: 'default',
   eager: true,

@@ -1,0 +1,185 @@
+---
+title: Dependencias y versiones
+description: Instala paquetes con npm, entiende los rangos de versiones y para qué sirven el lockfile y npx.
+sidebar:
+  order: 4
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Instalar y quitar dependencias, y distinguir `dependencies` de `devDependencies`.
+- Explicar qué significa cada número de una versión y qué aceptan `^` y `~`.
+- Explicar para qué sirven `node_modules` y `package-lock.json`, y cuáles van en git.
+- Ejecutar herramientas sin instalarlas con `npx`.
+- Decidir si una tarea necesita una dependencia o si Node ya la resuelve.
+
+## Explicación
+
+### Instalar una dependencia
+
+Una **dependencia** es un paquete de otra persona que tu proyecto usa. Se descargan del
+**registro de npm** ([npmjs.com](https://www.npmjs.com/)). En la carpeta `hola-npm` de la
+lección anterior:
+
+```sh
+npm install picocolors
+```
+
+```txt
+added 1 package, and audited 2 packages in 469ms
+
+found 0 vulnerabilities
+```
+
+npm hizo tres cosas:
+
+1. Descargó el paquete en la carpeta **`node_modules/`**.
+2. Lo anotó en `package.json`, en `"dependencies": { "picocolors": "^1.1.1" }`.
+3. Creó **`package-lock.json`** con la versión exacta que instaló.
+
+Ahora lo puedes importar por su nombre, sin `./` (en un `index.js`, dentro de `hola-npm`):
+
+```js
+import pc from 'picocolors';
+console.log(pc.green('¡Funciona!'));
+```
+
+Node lo encuentra buscando en `node_modules/`.
+
+### Tipos de dependencia
+
+- **`dependencies`:** lo que el programa necesita para funcionar (`npm install fastify`).
+- **`devDependencies`:** lo que solo usas mientras desarrollas: formateadores, linters,
+  herramientas de pruebas (`npm install --save-dev prettier`, o `-D`).
+
+Para quitar una: `npm uninstall picocolors`. Para ver qué tienes instalado: `npm ls`.
+
+### Versiones semánticas (semver)
+
+Casi todos los paquetes usan **versionado semántico**: `MAYOR.MENOR.PARCHE`, como `1.4.2`.
+
+| Sube el…      | Cuando…                                              | Ejemplo           |
+| ------------- | ---------------------------------------------------- | ----------------- |
+| **PARCHE**    | Se corrige un error sin cambiar cómo se usa          | `1.4.2` → `1.4.3` |
+| **MENOR**     | Se agrega algo nuevo sin romper lo que ya existía    | `1.4.3` → `1.5.0` |
+| **MAYOR**     | Hay cambios incompatibles: tu código puede romperse  | `1.5.0` → `2.0.0` |
+
+En `package.json` no se anota una versión, sino un **rango** de versiones aceptables:
+
+- `^1.1.1` (lo que npm pone por defecto): cualquier `1.x.x` desde `1.1.1`. Acepta menores y
+  parches, pero no un cambio de mayor.
+- `~1.1.1`: cualquier `1.1.x` desde `1.1.1`. Solo parches.
+- `1.1.1`: exactamente esa.
+
+Con versiones `0.x` el `^` es más estricto (`^0.2.3` no acepta `0.3.0`), porque antes de la
+`1.0.0` se considera que cualquier cambio de menor puede romper cosas. En el ejercicio de esta
+lección programas estas reglas.
+
+### El lockfile
+
+Si tu `package.json` dice `^1.1.1`, hoy se instala `1.1.1` y dentro de seis meses quizá la
+`1.3.0`. Para que todos (tus compañeros, el servidor, tú mismo en otra computadora) tengan
+**exactamente** las mismas versiones existe el **_lockfile_** (archivo de bloqueo):
+`package-lock.json`. Guarda la versión exacta de cada paquete, incluidas las dependencias de
+tus dependencias.
+
+- `npm install` respeta el lockfile y lo actualiza si agregas o quitas algo.
+- `npm ci` instala **exactamente** lo del lockfile, desde cero. Es lo que se usa en servidores
+  y en integración continua (_CI_, las pruebas automáticas en cada cambio).
+
+| Archivo             | ¿Va en git?                                                              |
+| ------------------- | ------------------------------------------------------------------------ |
+| `package.json`      | Sí                                                                       |
+| `package-lock.json` | Sí                                                                       |
+| `node_modules/`     | **No**: se regenera con `npm install`. Agrégalo a `.gitignore`.         |
+
+Para ver qué dependencias tienen versiones nuevas: `npm outdated`. Para buscar
+vulnerabilidades conocidas: `npm audit` (lo ves a fondo en el módulo 19).
+
+### npx: ejecutar sin instalar
+
+`npx` descarga un paquete a un caché temporal y ejecuta su comando. Sirve para herramientas
+que usas de vez en cuando. Por ejemplo, el paquete `semver` (el que usa npm por dentro) trae un
+comando que dice qué versiones cumplen un rango:
+
+```sh
+npx semver -r "^1.2.0" 1.1.9 1.2.3 1.3.0 2.0.0
+```
+
+```txt
+1.2.3
+1.3.0
+```
+
+La primera vez npm te pregunta si quieres instalarlo (`Ok to proceed? (y)`). Si el paquete ya
+está en tu `node_modules`, `npx` usa ese.
+
+### ¿De verdad necesitas esa dependencia?
+
+Cada dependencia es código de alguien más que corre en tu programa: puede tener errores,
+dejar de mantenerse o, en casos extremos, ser maliciosa. Antes de instalar algo, revisa si Node
+ya lo resuelve. Por ejemplo, `picocolors` pinta texto en la terminal, pero Node 24 ya trae
+`util.styleText`. En el nivel básico de este curso no usamos ninguna dependencia externa por
+esa razón.
+
+<Aside>
+  El repositorio del curso sí tiene dependencias, para el sitio y las herramientas (Astro,
+  ESLint, Prettier). Por eso corriste `npm install` en el módulo 0. Abre su `package.json` y
+  busca `devDependencies` y `workspaces`.
+</Aside>
+
+## Ejemplos
+
+Desde `ejemplos/basico/03-modulos-y-npm`:
+
+<Ejemplo archivo="basico/03-modulos-y-npm/09-colores-sin-dependencias.js" />
+
+```sh
+node 09-colores-sin-dependencias.js
+```
+
+```txt
+✔ tarea completada
+✖ tarea vencida
+```
+
+En tu terminal la primera línea sale en verde y la segunda en rojo y negritas.
+
+## Errores comunes
+
+**`Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'picocolors' imported from …`.** El
+paquete no está en `node_modules`. Si acabas de clonar un proyecto, te faltó `npm install`. Si
+no, instálalo con `npm install picocolors`. Revisa también que estés en la carpeta correcta.
+
+**`npm error 404 Not Found - GET https://registry.npmjs.org/picocolor`.** El paquete no existe
+con ese nombre: revisa cómo se escribe en [npmjs.com](https://www.npmjs.com/).
+
+**`npm error code ERESOLVE` y `unable to resolve dependency tree`.** Dos dependencias piden
+versiones incompatibles de un tercer paquete. Lee qué paquete y qué versiones menciona el
+error; muchas veces se resuelve actualizando la dependencia más vieja.
+
+**Subiste `node_modules/` a git.** Son miles de archivos que se regeneran solos. Agrégalo a
+`.gitignore` y quítalo del repositorio con `git rm -r --cached node_modules`.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/03-modulos-y-npm/04-rango-semver">
+  Pista: convierte `'1.10.0'` en `[1, 10, 0]` con números, no con texto (como texto,
+  `'10' < '2'`). Luego piensa cada rango como "desde la versión base, hasta antes de un tope".
+</Ejercicio>
+
+## Para saber más
+
+- [`npm install`](https://docs.npmjs.com/cli/commands/npm-install),
+  [`npm ci`](https://docs.npmjs.com/cli/commands/npm-ci) y
+  [`npx`](https://docs.npmjs.com/cli/commands/npx) (documentación de npm)
+- [`package-lock.json`](https://docs.npmjs.com/cli/configuring-npm/package-lock-json)
+  (documentación de npm)
+- [Versionado semántico](https://semver.org/lang/es/) (especificación oficial, en español)
+- [Calculadora de semver](https://semver.npmjs.com/) (npm)
+- [`util.styleText`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilstyletextformat-text-options)
+  (documentación oficial de Node)
