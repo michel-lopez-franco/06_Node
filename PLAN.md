@@ -9,7 +9,7 @@ Estados: `pendiente` · `en progreso` · `revisado` (solo el profesor marca `rev
 | Paso 1: esqueleto, Starlight, CLAUDE.md, PLAN.md y CI | revisado                |
 | Desplegable "Ver solución" en `<Ejercicio>`           | revisado                |
 | Paso 2: piloto (módulos 0 y 1 completos)              | revisado                |
-| Paso 3: resto del básico + etapas E1–E3               | en progreso             |
+| Paso 3: resto del básico + etapas E1–E3               | revisado                |
 | Paso 4: nivel intermedio + etapas E4–E9               | pendiente               |
 | Paso 5: nivel pro + etapas E10–E17                    | pendiente               |
 | Hosting del sitio y forma de entrega de ejercicios    | pendiente (por decidir) |
@@ -24,7 +24,7 @@ Estados: `pendiente` · `en progreso` · `revisado` (solo el profesor marca `rev
 | 1   | ¿Qué es Node?                   | V8, libuv, REPL, `node archivo.js`, `process.argv`, `process.env`, códigos de salida                                                                              | —                                               | en progreso — listo para revisión |
 | 2   | Repaso de JavaScript (opcional) | Repaso **corto y opcional**: desestructuración, spread, clases, closures, errores, `structuredClone`. Enfocado en lo que se usa en Node; los alumnos ya vieron JS | —                                               | en progreso — listo para revisión |
 | 3   | Módulos y npm                   | ESM vs CommonJS, `package.json`, scripts, semver, `npx`, lockfile                                                                                                 | E1: CLI de tareas en memoria (`util.parseArgs`) | en progreso — listo para revisión |
-| 4   | Asincronía                      | Event loop, callbacks → promesas → `async`/`await`, `Promise.all`, timers, errores asíncronos                                                                     | —                                               | pendiente                         |
+| 4   | Asincronía                      | Event loop, callbacks → promesas → `async`/`await`, `Promise.all`, timers, errores asíncronos                                                                     | —                                               | en progreso — listo para revisión |
 | 5   | Archivos y rutas                | `node:fs/promises`, `node:path`, JSON, `node:url`, `import.meta.dirname`                                                                                          | E2: persistencia en `tareas.json`               | pendiente                         |
 | 6   | Pruebas con `node:test`         | `test`, `describe`, `assert`, `--watch`, TDD básico. Aquí se "abre la caja negra" de `npm test`                                                                   | E3: suite de tests de la CLI                    | pendiente                         |
 
@@ -93,3 +93,14 @@ Cierre: proyecto final libre con rúbrica — `pendiente`.
   Infraestructura: `verificar` y `<Ejemplo>` aceptan `.cjs`; nuevo componente
   `<ArchivoDelProyecto>`; nuevo `npm run test:proyecto` (también en CI); CLAUDE.md actualizado.
   Listo para revisión.
+- **2026-09-25 — Módulo 4 (Asincronía).** 5 lecciones (event loop con microtareas y
+  temporizadores; callbacks error-first y promesas; `async`/`await` y _top-level await_; `Promise.all`,
+  `allSettled`, `race` y `any`; errores asíncronos: rechazos sin atender, `await` olvidado y
+  errores dentro de callbacks), 15 ejemplos (más 2 módulos auxiliares con una "base de datos"
+  simulada, sin tocar `node:fs`, que es del módulo 5) y 7 ejercicios (`predecir-el-orden`,
+  `esperar`, `de-callback-a-promesa`, `resumen-de-usuario`, `cargar-en-paralelo`,
+  `con-tiempo-limite`, `reintentar`). El orden entre `process.nextTick`, promesas y
+  `setImmediate` cambia en ESM, así que la lección solo enseña el orden determinista (síncrono →
+  microtareas → temporizadores) y los menciona en un aviso. Los tests con tiempos usan márgenes
+  amplios; se comprobó que detectan soluciones secuenciales, temporizadores sin cancelar y
+  validaciones síncronas. Sin etapa del proyecto. Listo para revisión.

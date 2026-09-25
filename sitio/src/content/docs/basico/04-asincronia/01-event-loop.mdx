@@ -1,0 +1,176 @@
+---
+title: El event loop
+description: Cómo atiende Node muchas tareas con un solo hilo, en qué orden ejecuta cada cosa y por qué no debes bloquearlo.
+sidebar:
+  order: 1
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Distinguir código síncrono de código asíncrono.
+- Explicar qué hace el _event loop_ y qué papel tiene libuv.
+- Predecir el orden entre código síncrono, microtareas y temporizadores.
+- Usar `setTimeout`, `setInterval` y cancelarlos.
+- Reconocer código que bloquea el _event loop_.
+
+## Explicación
+
+### Síncrono y asíncrono
+
+El código **síncrono** se ejecuta línea por línea: cada una espera a que termine la anterior.
+El código **asíncrono** empieza algo que tarda, deja una función para cuando termine y sigue
+de largo sin esperar. `setTimeout(funcion, 100)` es el ejemplo más simple: no se detiene
+100 ms, sino que agenda `funcion` y pasa a la siguiente línea.
+
+### Un solo hilo y un ciclo de eventos
+
+Tu JavaScript corre en **un solo hilo**: hace una cosa a la vez. Aun así, un servidor de Node
+atiende a miles de usuarios. El truco está en el reparto de trabajo que viste en el módulo 1:
+
+1. Tu código pide algo que tarda (un temporizador, leer un archivo, una consulta a la red).
+2. **libuv** se encarga de esperarlo, fuera de tu hilo, y tu código sigue.
+3. Cuando la operación termina, su función pendiente se forma en una **cola**.
+4. El **_event loop_** (ciclo de eventos) revisa las colas y ejecuta esas funciones, una por
+   una, **solo cuando tu código actual terminó**.
+
+Es como una cocina con un solo cocinero: mete el pan al horno, pone un temporizador y, en vez
+de quedarse mirando el horno, pica verduras. Cuando suena el temporizador, termina lo que
+estaba picando y saca el pan.
+
+### El orden de las cosas
+
+Cuando termina el código síncrono, Node atiende el trabajo pendiente en este orden:
+
+1. **Microtareas:** los `then` de promesas ya cumplidas (lección siguiente) y
+   `queueMicrotask`. Se atienden **todas**, en el orden en que se agendaron, antes de pasar
+   a lo siguiente.
+2. **Tareas del event loop:** temporizadores (`setTimeout`, `setInterval`), respuestas de
+   archivos y de red, etc. Después de **cada** una, se vuelven a vaciar las microtareas.
+
+Por eso un `setTimeout(..., 0)` no es "inmediato": espera a que termine el código síncrono y
+a que se vacíen las microtareas.
+
+<Aside title="¿Y process.nextTick y setImmediate?">
+  Vas a verlos en código de Node: `process.nextTick` agenda algo muy pronto (junto a las
+  microtareas) y `setImmediate` justo después de atender la entrada y salida. Su orden exacto
+  frente a promesas y temporizadores cambia según el contexto (incluso entre un archivo ESM y
+  uno CommonJS), así que no escribas código que dependa de él. En código nuevo, usa promesas.
+</Aside>
+
+### Temporizadores
+
+- `setTimeout(funcion, ms)` ejecuta la función **una vez**, al menos `ms` milisegundos
+  después (puede ser más si el hilo está ocupado).
+- `setInterval(funcion, ms)` la ejecuta **cada** `ms` milisegundos.
+- Ambos devuelven un identificador para cancelarlos con `clearTimeout` o `clearInterval`.
+- Mientras haya un temporizador o un intervalo activo, el programa **no termina**.
+
+### No bloquees el event loop
+
+Si tu código síncrono tarda, nadie más puede ejecutarse: los temporizadores se retrasan y, en
+un servidor, **ningún** usuario recibe respuesta mientras tanto. Los culpables típicos son
+ciclos muy largos, cálculos pesados y las versiones síncronas de las APIs de Node (como
+`readFileSync`, que verás en el módulo 5). En el módulo 18 verás cómo mover trabajo pesado a
+otros hilos.
+
+## Ejemplos
+
+Desde `ejemplos/basico/04-asincronia`:
+
+<Ejemplo archivo="basico/04-asincronia/01-sincrono-vs-asincrono.js" />
+
+```sh
+node 01-sincrono-vs-asincrono.js
+```
+
+```txt
+1. Inicio
+2. Fin del código síncrono
+3. Temporizador de 0 ms
+4. Pasaron 100 ms
+```
+
+<Ejemplo archivo="basico/04-asincronia/02-orden-del-event-loop.js" />
+
+```sh
+node 02-orden-del-event-loop.js
+```
+
+```txt
+1. síncrono
+2. síncrono, al final del archivo
+3. then de una promesa (microtarea)
+4. queueMicrotask (otra microtarea)
+5. setTimeout de 0 ms
+```
+
+El `setTimeout` se agendó primero, pero se ejecuta al último: las microtareas van antes.
+
+<Ejemplo archivo="basico/04-asincronia/03-bloquear-el-loop.js" />
+
+```sh
+node 03-bloquear-el-loop.js
+```
+
+```txt
+Terminó el ciclo pesado
+El temporizador de 10 ms se ejecutó a los 301 ms
+¿Llegó tarde? sí
+```
+
+Los milisegundos exactos cambian en cada ejecución.
+
+<Ejemplo archivo="basico/04-asincronia/04-intervalos.js" />
+
+```sh
+node 04-intervalos.js
+```
+
+```txt
+Vuelta 1
+Vuelta 2
+Vuelta 3
+Intervalo detenido
+```
+
+## Errores comunes
+
+**El programa nunca termina (se queda "colgado" en la terminal).** Quedó un `setInterval`
+activo, o un servidor escuchando. Cancela el intervalo con `clearInterval` cuando ya no lo
+necesites. Para salir en ese momento, presiona <kbd>Ctrl</kbd> + <kbd>C</kbd>.
+
+**Un valor sale `undefined` porque "todavía no llega".** Usaste afuera un resultado que se
+asigna dentro de un callback o un `then`. El código de afuera se ejecuta **antes**. Todo lo
+que dependa del resultado tiene que ir dentro del callback (o después de un `await`, en la
+lección 3).
+
+**Un temporizador se ejecuta mucho después de lo indicado.** Algo síncrono está ocupando el
+hilo. `ms` es un mínimo, no una garantía.
+
+**`TypeError [ERR_INVALID_ARG_TYPE]: The "callback" argument must be of type function.
+Received undefined`.** Le pasaste a `setTimeout` el **resultado** de llamar a una función
+(`setTimeout(saludar(), 100)`) en lugar de la función (`setTimeout(saludar, 100)` o
+`setTimeout(() => saludar('Ana'), 100)`).
+
+## Ejercicios
+
+<Ejercicio ruta="basico/04-asincronia/01-predecir-el-orden">
+  Resuélvelo en papel antes de escribir código. La única pieza nueva es el `await`, que verás
+  a fondo en la lección 3: el cuerpo de una función `async` corre de inmediato y, al llegar a
+  un `await`, el resto se agenda como microtarea.
+</Ejercicio>
+
+## Para saber más
+
+- [El event loop de Node](https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick)
+  (guía oficial de Node)
+- [No bloquees el event loop](https://nodejs.org/en/learn/asynchronous-work/dont-block-the-event-loop)
+  (guía oficial de Node)
+- [Temporizadores](https://nodejs.org/docs/latest-v24.x/api/timers.html) (documentación
+  oficial de Node)
+- [¿Qué es el event loop?](https://www.youtube.com/watch?v=8aGhZQkoFbQ), charla de Philip
+  Roberts (en inglés, con subtítulos)

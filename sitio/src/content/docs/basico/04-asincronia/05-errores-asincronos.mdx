@@ -1,0 +1,144 @@
+---
+title: Errores asíncronos
+description: Evita rechazos sin atender, olvidos de await y errores que escapan de try/catch.
+sidebar:
+  order: 5
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Explicar qué pasa con una promesa rechazada que nadie atiende.
+- Detectar un `await` olvidado por sus síntomas.
+- Explicar por qué `try`/`catch` no atrapa errores lanzados dentro de un callback.
+- Reintentar una operación que falla de forma pasajera.
+
+## Explicación
+
+### Rechazos sin atender
+
+Una promesa rechazada que no tiene `catch` ni `await` que la atienda es un **rechazo sin
+atender** (_unhandled rejection_). Node lo trata igual que un error síncrono sin capturar:
+imprime el error y **termina el programa con código 1**. Es a propósito: un error ignorado en
+un servidor puede dejar datos a medias sin que nadie se entere.
+
+La regla: **toda promesa debe terminar en un `await` (dentro de un `try` si quieres manejar el
+error) o en un `.catch()`**.
+
+### El `await` olvidado
+
+Es el error asíncrono más común, y no siempre truena. Sus síntomas:
+
+- Ves `Promise { <pending> }` donde esperabas un valor.
+- Una propiedad sale `undefined` (`tarea.titulo` cuando `tarea` es una promesa).
+- Una comparación da un resultado raro: `if (await existe())` no es lo mismo que
+  `if (existe())`, que siempre es verdadero, porque una promesa es un objeto.
+- El `catch` no atrapa el error: `return promesa` dentro de un `try` devuelve la promesa antes
+  de que se rechace. Usa `return await promesa`.
+
+### Errores dentro de callbacks
+
+`try`/`catch` solo atrapa errores que ocurren **mientras** se ejecuta el bloque `try`. Un
+callback de `setTimeout` (o de cualquier API de callbacks) se ejecuta después, cuando el `try`
+ya terminó. Por eso los callbacks usan la convención error-first en lugar de `throw`: el error
+**viaja como argumento**. Con promesas y `await` este problema desaparece, otra razón para
+preferirlos.
+
+### Reintentar
+
+Algunos errores son pasajeros: la red falló un instante, el servidor estaba ocupado. Para
+esos, reintentar después de una breve espera suele funcionar. Solo reintenta lo que puede
+salir bien la segunda vez: un "usuario no existe" va a fallar igual.
+
+<Aside type="caution" title="Último recurso: process.on('unhandledRejection')">
+  Puedes registrar una función que se ejecute ante cualquier rechazo sin atender, por ejemplo
+  para escribir un log antes de salir. No la uses para ignorar errores: si llegó ahí, tu código
+  tiene un `await` o un `catch` faltante. Lo verás con más detalle en el módulo 20.
+</Aside>
+
+## Ejemplos
+
+Desde `ejemplos/basico/04-asincronia`:
+
+<Ejemplo archivo="basico/04-asincronia/13-rechazo-sin-manejar.js" />
+
+```sh
+node 13-rechazo-sin-manejar.js
+```
+
+```txt
+file:///…/ejemplos/basico/04-asincronia/modulos/tareas-promesas.js:14
+    throw new Error(`No existe la tarea ${id}`);
+          ^
+
+Error: No existe la tarea 99
+    at buscarTarea (file:///…/modulos/tareas-promesas.js:14:11)
+
+Node.js v24.7.0
+```
+
+El programa terminó con código 1 (compruébalo con `echo $?` en macOS/Linux o
+`echo $LASTEXITCODE` en PowerShell) y el `setTimeout` nunca se ejecutó.
+
+<Ejemplo archivo="basico/04-asincronia/14-olvidar-await.js" />
+
+```sh
+node 14-olvidar-await.js
+```
+
+```txt
+1. titulo sin await: undefined
+2. con await: atrapado adentro
+3. sin await, el error llegó hasta afuera: No existe la tarea 99
+```
+
+<Ejemplo archivo="basico/04-asincronia/15-errores-en-callbacks.js" />
+
+```sh
+node 15-errores-en-callbacks.js
+```
+
+```txt
+El try terminó sin errores
+file:///…/ejemplos/basico/04-asincronia/15-errores-en-callbacks.js:8
+    throw new Error('lanzado dentro del setTimeout');
+    ^
+
+Error: lanzado dentro del setTimeout
+    at Timeout._onTimeout (file:///…/15-errores-en-callbacks.js:8:11)
+    ...
+```
+
+El `catch` nunca se ejecutó y el programa terminó con código 1.
+
+## Errores comunes
+
+**El programa termina con un error y la pila menciona una función `async`, sin decir quién la
+llamó.** Es un rechazo sin atender. Busca dónde se llama esa función sin `await` ni `.catch()`.
+
+**`Promise { <pending> }` o `undefined` donde esperabas un valor.** Falta un `await`.
+
+**`Promise { <rejected> Error: ... }` al imprimir algo.** Imprimiste una promesa ya rechazada
+en lugar de esperarla. Ponle `await` dentro de un `try`.
+
+**El error aparece dos veces, o se registra y además truena.** Atrapaste el error en un
+`catch`, lo imprimiste y lo volviste a lanzar, y alguien más arriba también lo imprime. Decide
+un solo lugar para reportarlo; en los demás, envuélvelo con `cause` o déjalo pasar.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/04-asincronia/07-reintentar">
+  Pista: un `for` del 1 a `intentos` con `try`/`catch` adentro. Aquí el `await` dentro del
+  ciclo es correcto: cada intento depende de que el anterior haya fallado.
+</Ejercicio>
+
+## Para saber más
+
+- [Evento `unhandledRejection`](https://nodejs.org/docs/latest-v24.x/api/process.html#event-unhandledrejection)
+  y la opción [`--unhandled-rejections`](https://nodejs.org/docs/latest-v24.x/api/cli.html#--unhandled-rejectionsmode)
+  (documentación oficial de Node)
+- [Errores en Node](https://nodejs.org/docs/latest-v24.x/api/errors.html) (documentación
+  oficial de Node)

@@ -1,0 +1,188 @@
+---
+title: Callbacks y promesas
+description: Usa APIs con callbacks error-first, crea y encadena promesas, y convierte unas en otras.
+sidebar:
+  order: 2
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Usar una función con un _callback_ error-first y manejar su error.
+- Explicar por qué los callbacks anidados se vuelven difíciles de leer.
+- Crear una promesa con `new Promise` y consumirla con `then`, `catch` y `finally`.
+- Encadenar promesas y atrapar errores de cualquier paso con un solo `catch`.
+- Convertir una función con callback en una que devuelve promesa.
+
+## Explicación
+
+### Callbacks error-first
+
+La primera forma de escribir código asíncrono en Node fue el **_callback_**: una función que
+le pasas a otra para que la llame cuando termine. Node adoptó una convención llamada
+**error-first** (error primero):
+
+```js
+buscarTarea(1, (error, tarea) => { /* ... */ });
+```
+
+- El callback siempre recibe **primero el error**: `null` si todo salió bien, o un `Error`.
+- Después vienen los resultados, que solo sirven si no hubo error.
+
+Por eso todo callback empieza con `if (error) { ...; return; }`. Si olvidas el `return`, el
+código sigue con un resultado `undefined`.
+
+### El problema: callbacks anidados
+
+Si un paso depende del anterior, su código va **dentro** del callback anterior. Con tres o
+cuatro pasos, el código avanza hacia la derecha en forma de pirámide y cada nivel repite el
+manejo del error. A esto se le llama _callback hell_ (el infierno de los callbacks). Las
+promesas nacieron para resolverlo.
+
+### Promesas
+
+Una **promesa** es un objeto que representa un resultado que todavía no está listo. Siempre
+está en uno de tres estados:
+
+- **Pendiente** (_pending_): la operación no ha terminado.
+- **Cumplida** (_fulfilled_): terminó bien y tiene un **valor**.
+- **Rechazada** (_rejected_): falló y tiene un **motivo**, normalmente un `Error`.
+
+Una vez cumplida o rechazada, ya no cambia. Para usar el resultado:
+
+- `promesa.then(valor => ...)` se ejecuta si se cumple.
+- `promesa.catch(error => ...)` se ejecuta si se rechaza.
+- `promesa.finally(() => ...)` se ejecuta en ambos casos; útil para limpiar.
+
+Para **crear** una promesa, `new Promise` recibe una función con dos parámetros, `resolve` y
+`reject`: llama a uno de ellos cuando la operación termine. Casi nunca lo necesitas, salvo
+para envolver APIs de callbacks.
+
+### Encadenar
+
+`then` devuelve **una promesa nueva**, así que puedes encadenar pasos:
+
+- Lo que devuelves en un `then` le llega al siguiente.
+- Si devuelves una **promesa**, el siguiente `then` espera a que se cumpla.
+- Si algún paso falla, se saltan los `then` que siguen hasta el primer `catch`.
+
+El resultado es código plano, un paso por renglón, con un solo lugar para los errores.
+
+### De callbacks a promesas
+
+- **`util.promisify(fn)`** convierte una función error-first en una que devuelve promesa.
+- Muchos módulos de Node ya traen su versión con promesas: `node:timers/promises`,
+  `node:fs/promises` (módulo 5), `node:dns/promises`... Prefiérelos.
+
+## Ejemplos
+
+Desde `ejemplos/basico/04-asincronia`. Los ejemplos usan una "base de datos" de mentira que
+tarda 50 ms en responder:
+
+<Ejemplo archivo="basico/04-asincronia/modulos/tareas-callback.js" />
+
+<Ejemplo archivo="basico/04-asincronia/05-callbacks.js" />
+
+```sh
+node 05-callbacks.js
+```
+
+```txt
+Buscando...
+Encontrada: Leer el módulo 4
+Error: No existe la tarea 99
+```
+
+<Ejemplo archivo="basico/04-asincronia/06-callbacks-anidados.js" />
+
+```sh
+node 06-callbacks-anidados.js
+```
+
+```txt
+Ana tiene: "Leer el módulo 4" y "Resolver los ejercicios"
+```
+
+<Ejemplo archivo="basico/04-asincronia/07-promesas.js" />
+
+```sh
+node 07-promesas.js
+```
+
+La salida depende del volado. Puede ser:
+
+```txt
+1. La promesa recién creada: Promise { <pending> }
+2. Ganaste: águila
+3. Fin del volado (se ejecuta siempre)
+```
+
+o bien `2. Perdiste: salió sol`. Ejecútalo varias veces.
+
+La versión con promesas de la "base de datos" usa `async`, que verás en la lección siguiente.
+Por ahora basta saber que sus funciones devuelven promesas:
+
+<Ejemplo archivo="basico/04-asincronia/08-encadenar.js" />
+
+```sh
+node 08-encadenar.js
+```
+
+```txt
+1. Ana tiene: "Leer el módulo 4"
+2. Error: No existe la tarea 99
+```
+
+<Ejemplo archivo="basico/04-asincronia/09-promisify.js" />
+
+```sh
+node 09-promisify.js
+```
+
+```txt
+1. Resolver los ejercicios
+2. valor al terminar
+```
+
+## Errores comunes
+
+**`TypeError: Cannot read properties of undefined (reading 'titulo')` dentro de un
+callback.** Hubo un error y lo ignoraste: revisaste `if (error)` pero sin `return`, o no lo
+revisaste. Con error, el resultado es `undefined`.
+
+**Un `then` recibe `undefined`.** El `then` anterior no devolvió nada. Si usas llaves en la
+función flecha, necesitas `return`: `.then((t) => { return buscarUsuario(t.usuarioId); })`.
+
+**Un `then` recibe `Promise { <pending> }`.** Anidaste un `then` dentro de otro en lugar de
+devolver la promesa. Devuélvela y encadena el siguiente `then` afuera.
+
+**La promesa se queda pendiente para siempre.** Dentro de `new Promise` hay un camino que no
+llama ni a `resolve` ni a `reject`. Revisa cada `if`.
+
+**`TypeError: Promise resolver undefined is not a function`.** Escribiste `new Promise()` sin
+la función con `resolve` y `reject`.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/04-asincronia/02-esperar">
+  Pista: `setTimeout(resolve, ms, valor)` llama a `resolve(valor)` después de `ms`. Para el
+  error, llama a `reject` en lugar de usar `throw`.
+</Ejercicio>
+
+<Ejercicio ruta="basico/04-asincronia/03-de-callback-a-promesa">
+  Pista: para `promisificar`, devuelve una función con parámetros _rest_ (`...args`) y
+  pásaselos a `fn` con _spread_, más el callback al final.
+</Ejercicio>
+
+## Para saber más
+
+- [Usar promesas](https://developer.mozilla.org/es/docs/Web/JavaScript/Guide/Using_promises)
+  (MDN)
+- [`Promise`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Promise)
+  (MDN)
+- [`util.promisify`](https://nodejs.org/docs/latest-v24.x/api/util.html#utilpromisifyoriginal)
+  (documentación oficial de Node)
+- [`node:timers/promises`](https://nodejs.org/docs/latest-v24.x/api/timers.html#timers-promises-api)
+  (documentación oficial de Node)

@@ -1,0 +1,128 @@
+---
+title: Varias promesas a la vez
+description: Ejecuta operaciones en paralelo con Promise.all y elige entre all, allSettled, race y any.
+sidebar:
+  order: 4
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Distinguir cuándo las operaciones deben ir en secuencia y cuándo en paralelo.
+- Ejecutar varias promesas en paralelo con `Promise.all`.
+- Elegir entre `Promise.all`, `allSettled`, `race` y `any` según cómo quieras tratar los
+  fallos.
+- Ponerle un tiempo límite a una promesa.
+
+## Explicación
+
+### Secuencia o paralelo
+
+Cada `await` espera a que termine una operación antes de empezar la siguiente. Eso es
+correcto cuando **un paso necesita el resultado del anterior** (buscar la tarea y luego su
+usuario). Pero si las operaciones son independientes (cargar tres tareas distintas), esperar
+una tras otra desperdicia tiempo: tres consultas de 100 ms tardan 300 ms en secuencia y unos
+100 ms en paralelo.
+
+La clave: una operación asíncrona **empieza en cuanto llamas a la función**, no cuando haces
+`await`. Para ir en paralelo, llama a todas primero y espera después.
+
+### Los combinadores
+
+Todos reciben un arreglo de promesas y devuelven una promesa nueva:
+
+| Método                      | Se cumple cuando…                  | Se rechaza cuando…                        | Úsalo para…                                  |
+| --------------------------- | ---------------------------------- | ----------------------------------------- | -------------------------------------------- |
+| `Promise.all`               | **todas** se cumplen (arreglo de valores, en orden) | **una** se rechaza (con su error) | Necesitas todos los resultados              |
+| `Promise.allSettled`        | **todas** terminan, bien o mal     | Nunca                                     | Hacer lo posible y reportar los fallos       |
+| `Promise.race`              | La **primera en terminar** se cumple | La primera en terminar se rechaza       | Tiempos límite                               |
+| `Promise.any`               | La **primera** se cumple           | **Todas** se rechazan (`AggregateError`)  | Usar la fuente que responda primero          |
+
+`Promise.all` devuelve los resultados **en el orden del arreglo**, no en el orden en que
+terminaron. Y si una falla, no cancela las demás: siguen corriendo, solo que ya nadie espera
+su resultado.
+
+### Un patrón muy común
+
+```js
+const tareas = await Promise.all(ids.map((id) => buscarTarea(id)));
+```
+
+`map` llama a `buscarTarea` para cada id (todas arrancan juntas) y devuelve un arreglo de
+promesas; `Promise.all` espera a todas.
+
+Cuidado con miles de elementos: lanzar 10 000 consultas a la vez puede saturar la base de
+datos. En esos casos se procesan por lotes; lo verás en el nivel intermedio.
+
+## Ejemplos
+
+Desde `ejemplos/basico/04-asincronia`:
+
+<Ejemplo archivo="basico/04-asincronia/11-secuencial-vs-paralelo.js" />
+
+```sh
+node 11-secuencial-vs-paralelo.js
+```
+
+```txt
+Secuencial: [ 'A', 'B', 'C' ] ~300 ms
+Paralelo:   [ 'A', 'B', 'C' ] ~100 ms
+```
+
+<Ejemplo archivo="basico/04-asincronia/12-combinadores.js" />
+
+```sh
+node 12-combinadores.js
+```
+
+```txt
+all:        b falló
+allSettled: fulfilled, rejected
+race:       rápida
+any:        la que sí
+```
+
+## Errores comunes
+
+**Un ciclo con `await` adentro es muy lento.** `for (const id of ids) { await buscar(id); }`
+espera cada operación antes de pedir la siguiente. Si no dependen entre sí, usa
+`Promise.all(ids.map(...))`.
+
+**`Promise.all` devuelve un arreglo de `undefined`.** La función que le pasaste a `map` usa
+llaves y no tiene `return`: `ids.map((id) => { buscar(id); })`. Quita las llaves o agrega
+`return`.
+
+**`TypeError: object is not iterable (cannot read property Symbol(Symbol.iterator))`.**
+Le pasaste a `Promise.all` promesas sueltas (`Promise.all(p1, p2)`) en lugar de un arreglo
+(`Promise.all([p1, p2])`).
+
+**`AggregateError: All promises were rejected`.** Todas las promesas de `Promise.any`
+fallaron. Los errores individuales están en `error.errors`.
+
+**Con `forEach` y `async`, el código sigue antes de que terminen.** `forEach` ignora las
+promesas que devuelve su callback. Usa `for...of` (secuencial) o `Promise.all` con `map`
+(paralelo).
+
+## Ejercicios
+
+<Ejercicio ruta="basico/04-asincronia/05-cargar-en-paralelo">
+  Pista: `allSettled` te da objetos `{ status, value }` o `{ status, reason }`; recórrelos
+  con `for...of` para separar las tareas de los errores.
+</Ejercicio>
+
+<Ejercicio ruta="basico/04-asincronia/06-con-tiempo-limite">
+  Pista: crea una segunda promesa que solo se rechaza con un `setTimeout`, ponla a competir
+  con `Promise.race` y cancela el temporizador con `finally`.
+</Ejercicio>
+
+## Para saber más
+
+- [`Promise.all`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Promise/all),
+  [`allSettled`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled),
+  [`race`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Promise/race)
+  y [`any`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Global_Objects/Promise/any)
+  (MDN)
+- [Composición de promesas](https://developer.mozilla.org/es/docs/Web/JavaScript/Guide/Using_promises#composici%C3%B3n)
+  (MDN)

@@ -1,0 +1,34 @@
+---
+title: Asincronía
+description: Cómo hace Node muchas cosas a la vez con un solo hilo, y cómo escribir código asíncrono con callbacks, promesas y async/await.
+sidebar:
+  order: 0
+  label: Introducción
+---
+
+Casi todo lo interesante que hace un programa de Node tarda: leer un archivo, consultar una
+base de datos, esperar una petición HTTP. Node no se queda detenido esperando; pide la
+operación, sigue con lo demás y la atiende cuando termina. Esa es la **asincronía**, y es la
+idea más importante del curso: todo lo que viene después (archivos, servidores, bases de datos)
+la usa.
+
+En este módulo ves cómo funciona por dentro (el _event loop_) y las tres formas de escribir
+código asíncrono, en el orden en que aparecieron en la historia de Node: _callbacks_,
+promesas y `async`/`await`. En el código nuevo usarás casi siempre la última, pero vas a leer
+las tres.
+
+## Al terminar este módulo podrás
+
+- Predecir en qué orden se ejecuta código síncrono, microtareas y temporizadores.
+- Usar APIs con _callbacks_ error-first y convertirlas en promesas.
+- Crear promesas y consumirlas con `then`/`catch` y con `async`/`await`.
+- Ejecutar varias operaciones en paralelo con `Promise.all` y sus variantes.
+- Manejar errores asíncronos y evitar rechazos sin atender.
+
+## Lecciones
+
+1. [El event loop](./01-event-loop/)
+2. [Callbacks y promesas](./02-callbacks-y-promesas/)
+3. [async y await](./03-async-await/)
+4. [Varias promesas a la vez](./04-varias-promesas/)
+5. [Errores asíncronos](./05-errores-asincronos/)

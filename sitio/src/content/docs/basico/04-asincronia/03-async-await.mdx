@@ -1,0 +1,115 @@
+---
+title: async y await
+description: Escribe código asíncrono que se lee como síncrono con funciones async, await y try/catch.
+sidebar:
+  order: 3
+---
+
+import Ejemplo from '../../../../components/Ejemplo.astro';
+import Ejercicio from '../../../../components/Ejercicio.astro';
+
+## Objetivos
+
+- Declarar funciones `async` y explicar qué devuelven.
+- Esperar promesas con `await` y manejar sus errores con `try`/`catch`.
+- Usar `await` en el nivel superior de un módulo ESM.
+- Envolver un error asíncrono con un mensaje propio y `cause`.
+
+## Explicación
+
+### Funciones `async`
+
+Poner `async` antes de una función cambia dos cosas:
+
+1. **Siempre devuelve una promesa.** Si haces `return 5`, quien la llame recibe una promesa
+   que se cumple con `5`. Si lanzas un error con `throw`, recibe una promesa rechazada.
+2. **Puedes usar `await` dentro.**
+
+### `await`
+
+`await promesa` **pausa la función** hasta que la promesa termine y entrega su valor. Si la
+promesa se rechaza, `await` **lanza** el error en esa línea, como un `throw`.
+
+Lo importante: pausa **solo esa función**, no el programa. Mientras espera, el event loop
+sigue atendiendo todo lo demás. Por debajo, `await` es un `then`: el resto de la función se
+agenda como microtarea cuando la promesa se cumple.
+
+El flujo de `08-encadenar.js` con `async`/`await` queda así:
+
+```js
+const tarea = await buscarTarea(id);
+const usuario = await buscarUsuario(tarea.usuarioId);
+```
+
+Se lee de arriba a abajo, y las variables quedan disponibles para las líneas siguientes sin
+trucos.
+
+### Errores con `try`/`catch`
+
+Como un rechazo se convierte en un error lanzado, lo atrapas con el mismo `try`/`catch` del
+código síncrono (módulo 2). Una práctica común es **envolver** el error con un mensaje que
+explique qué intentabas hacer, guardando el original en `cause`:
+
+```js
+throw new Error(`No se pudo cargar el usuario ${id}`, { cause: error });
+```
+
+### `await` en el nivel superior
+
+En un módulo ESM puedes usar `await` fuera de cualquier función (_top-level await_). Es útil
+en scripts: cargar la configuración, esperar la conexión a la base de datos y luego arrancar.
+Mientras un módulo espera en su nivel superior, los módulos que lo importan esperan también.
+
+## Ejemplos
+
+Desde `ejemplos/basico/04-asincronia`:
+
+<Ejemplo archivo="basico/04-asincronia/modulos/tareas-promesas.js" />
+
+<Ejemplo archivo="basico/04-asincronia/10-async-await.js" />
+
+```sh
+node 10-async-await.js
+```
+
+```txt
+1. Ana tiene: "Leer el módulo 4"
+2. No se pudo: No existe la tarea 99
+3. Promise { <pending> }
+```
+
+La línea 3 muestra lo que devuelve una función `async` si no la esperas: una promesa.
+
+## Errores comunes
+
+**`SyntaxError: Unexpected reserved word`, señalando un `await`.** Usaste `await` dentro de
+una función que no es `async`. Agrégale `async`. (En un archivo CommonJS el mensaje es más
+claro: `await is only valid in async functions and the top level bodies of modules`.) Ojo con
+los callbacks: en `lista.forEach((x) => { await ... })` la función flecha también necesita
+`async`, y aun así `forEach` no espera (usa `for...of`).
+
+**Ves `Promise { <pending> }` donde esperabas un valor.** Te faltó `await`. Lo verás a fondo
+en la lección 5.
+
+**Una función `async` "no devuelve nada" aunque tiene `return`.** Sí devuelve: una promesa.
+Quien la llama necesita `await` o `.then()` para obtener el valor.
+
+**El `catch` no atrapa el error.** El `await` tiene que estar **dentro** del `try`. Si
+escribes `return promesa` sin `await` dentro de un `try`, el rechazo ocurre después, fuera del
+`try`. Usa `return await promesa`.
+
+## Ejercicios
+
+<Ejercicio ruta="basico/04-asincronia/04-resumen-de-usuario">
+  Pista: dos `await`, uno por cada función de la API. El de `obtenerUsuario` va dentro de un
+  `try`.
+</Ejercicio>
+
+## Para saber más
+
+- [`async function`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Statements/async_function)
+  (MDN)
+- [`await`](https://developer.mozilla.org/es/docs/Web/JavaScript/Reference/Operators/await)
+  (MDN)
+- [JavaScript asíncrono en Node](https://nodejs.org/en/learn/asynchronous-work/javascript-asynchronous-programming-and-callbacks)
+  (guía oficial de Node)
